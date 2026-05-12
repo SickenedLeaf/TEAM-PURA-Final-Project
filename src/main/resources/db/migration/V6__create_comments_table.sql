@@ -1,8 +1,0 @@
-CREATE TABLE comments (
-    comment_id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
-    game_id INTEGER NOT NULL REFERENCES games (game_id) ON DELETE CASCADE,
-    comment_body TEXT NOT NULL,
-    upvote_count INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
