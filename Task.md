@@ -118,21 +118,21 @@
 - [x] Implement sorting on price comparison endpoint (price asc/desc, source type filter)
 - [x] Add `last_updated` timestamp to price responses so frontend can show data freshness
 - [x] Manually seed 2–3 games and prices into the DB for testing *(Flyway `V8__seed_games_and_prices.sql` — run app once against DB to apply.)*
-- [ ] Test all endpoints in Postman — confirm correct JSON responses
-- [ ] Confirm cheapest price is correctly identified in the response
+- [x] Test all endpoints in Postman — confirm correct JSON responses
+- [x] Confirm cheapest price is correctly identified in the response
 
 ---
 
 ## Milestone 5 — Currency Conversion (F3)
 *Goal: Forex API integrated, all prices stored in PHP after conversion.*
 
-- [ ] Register for a free ExchangeRate API key (https://www.exchangerate-api.com)
-- [ ] Store API key in `application.properties` (not in code)
-- [ ] Create `ForexService.java` in `service` package:
+- [x] Register for a free ExchangeRate API key (https://www.exchangerate-api.com)
+- [x] Store API key in `application.properties` (not in code)
+- [x] Create `ForexService.java` in `service` package:
   - `getUsdToPhpRate()` — calls Forex API, returns current exchange rate
   - Cache the rate in memory for 24 hours to avoid excessive API calls
-- [ ] Integrate `ForexService` into the scraper/aggregation layer
-- [ ] Every non-PHP price must be converted before storing in the `prices` table
+- [x] Integrate `ForexService` into the scraper/aggregation layer
+- [x] Every non-PHP price must be converted before storing in the `prices` table
 - [ ] Test with a USD price — confirm it is stored as PHP in the DB
 
 ---
