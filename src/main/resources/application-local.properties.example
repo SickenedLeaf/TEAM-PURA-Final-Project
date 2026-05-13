@@ -7,3 +7,6 @@
 spring.datasource.url=jdbc:postgresql://localhost:5432/gamecheck
 spring.datasource.username=postgres
 spring.datasource.password=
+
+# JWT signing key (HS256) — use a long random string (at least 32 characters)
+app.jwt.secret=replace-with-a-long-random-secret-at-least-32-chars

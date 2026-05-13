@@ -9,9 +9,9 @@
 ## Milestone 0 — Environment Setup
 *Goal: Have a working Spring Boot project connected to a real database before writing any feature code.*
 
-- [ ] Install JDK 17+ on your machine
+- [x] Install JDK 17+ on your machine
 - [ ] Install IntelliJ IDEA Community Edition
-- [ ] Create a GitHub repository for the project (`gamecheck-backend`)
+- [x] Create a GitHub repository for the project (`gamecheck-backend`)
 - [x] Generate a new Spring Boot project at https://start.spring.io with these dependencies:
   - Spring Web
   - Spring Data JPA
@@ -82,42 +82,42 @@
 ## Milestone 3 — User Authentication (F9)
 *Goal: Register, login, and JWT-protected endpoints work end to end.*
 
-- [ ] Add JWT library dependency to `pom.xml` (e.g., `jjwt` by io.jsonwebtoken)
-- [ ] Create `JwtUtil.java` in `security` package — generates and validates JWT tokens
-- [ ] Create `JwtFilter.java` — Spring Security filter that reads JWT from request headers
-- [ ] Configure `SecurityConfig.java` — define which endpoints are public vs. protected
-- [ ] Create `AuthService.java` in `service` package:
+- [x] Add JWT library dependency to `pom.xml` (e.g., `jjwt` by io.jsonwebtoken)
+- [x] Create `JwtUtil.java` in `security` package — generates and validates JWT tokens
+- [x] Create `JwtFilter.java` — Spring Security filter that reads JWT from request headers
+- [x] Configure `SecurityConfig.java` — define which endpoints are public vs. protected
+- [x] Create `AuthService.java` in `service` package:
   - `register(email, password)` — hash password with BCrypt, save user, return success
   - `login(email, password)` — verify credentials, return JWT token
-- [ ] Create `AuthController.java` in `controller` package:
+- [x] Create `AuthController.java` in `controller` package:
   - `POST /api/auth/register` — takes email + password, returns success message
   - `POST /api/auth/login` — takes email + password, returns JWT token
-- [ ] Add login rate limiting (lockout after 5 failed attempts in 10 minutes)
-- [ ] Add input validation on all auth endpoints (email format, password not empty)
-- [ ] Test registration in Postman — confirm user appears in DB with hashed password
-- [ ] Test login in Postman — confirm JWT token is returned
-- [ ] Test a protected endpoint with and without the JWT token
+- [x] Add login rate limiting (lockout after 5 failed attempts in 10 minutes)
+- [x] Add input validation on all auth endpoints (email format, password not empty)
+- [x] Test registration in Postman — confirm user appears in DB with hashed password
+- [x] Test login in Postman — confirm JWT token is returned
+- [x] Test a protected endpoint with and without the JWT token
 
 ---
 
 ## Milestone 4 — Game Search & Price Comparison API (F1, F4, F5)
 *Goal: Core price comparison endpoints work with manually seeded data.*
 
-- [ ] Create `GameService.java` in `service` package:
+- [x] Create `GameService.java` in `service` package:
   - `searchGames(String query, String platform)` — searches games table, returns matches
   - `getGameById(Integer id)` — returns game details
   - `getPricesForGame(Integer id)` — returns all prices for a game, sorted cheapest first
-- [ ] Create `GameController.java` in `controller` package:
+- [x] Create `GameController.java` in `controller` package:
   - `GET /api/games/search?query=&platform=` — returns list of matching games
   - `GET /api/games/{id}` — returns game detail
   - `GET /api/games/{id}/prices` — returns price comparison table (sorted cheapest first)
-- [ ] Create DTOs for API responses (do not expose raw entity objects):
+- [x] Create DTOs for API responses (do not expose raw entity objects):
   - `GameSummaryDto.java` — for search results (id, title, platform, best price)
   - `GameDetailDto.java` — for game detail page
   - `PriceDto.java` — for individual price entries (source name, type, price in PHP, listing URL, last updated)
-- [ ] Implement sorting on price comparison endpoint (price asc/desc, source type filter)
-- [ ] Add `last_updated` timestamp to price responses so frontend can show data freshness
-- [ ] Manually seed 2–3 games and prices into the DB for testing
+- [x] Implement sorting on price comparison endpoint (price asc/desc, source type filter)
+- [x] Add `last_updated` timestamp to price responses so frontend can show data freshness
+- [x] Manually seed 2–3 games and prices into the DB for testing *(Flyway `V8__seed_games_and_prices.sql` — run app once against DB to apply.)*
 - [ ] Test all endpoints in Postman — confirm correct JSON responses
 - [ ] Confirm cheapest price is correctly identified in the response
 
