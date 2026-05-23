@@ -173,7 +173,7 @@
   - `POST /api/wishlist/{gameId}` — add to wishlist, optional alert threshold in body (JWT required)
   - `DELETE /api/wishlist/{gameId}` — remove from wishlist (JWT required)
 - [x] Price drop notification (basic): after each aggregation run, check if any wishlisted game dropped below a user's threshold — log it for now (email can be added later) *(via `WishlistPriceAlertService`, called from `AggregationService.runFullUpdate()`.)*
-- [ ] Test all wishlist endpoints in Postman with a valid JWT
+- [x] Test all wishlist endpoints in Postman with a valid JWT
 
 ---
 

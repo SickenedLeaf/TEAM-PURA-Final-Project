@@ -20,11 +20,16 @@ public class GameController {
 
     private final GameService gameService;
 
+    /**
+     * Search games. Optional {@code sort}: {@code price_asc} (default, cheapest first; no-price games last) or
+     * {@code price_desc}.
+     */
     @GetMapping("/search")
     public ResponseEntity<List<GameSummaryDto>> search(
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) String platform) {
-        return ResponseEntity.ok(gameService.searchGames(query, platform));
+            @RequestParam(required = false) String platform,
+            @RequestParam(required = false) String sort) {
+        return ResponseEntity.ok(gameService.searchGames(query, platform, sort));
     }
 
     @GetMapping("/{id}")

@@ -28,23 +28,22 @@ public class GameService {
     private final PriceRepository priceRepository;
 
     /**
-     * Searches games by optional title substring and platform. Both parameters may be blank; if both are blank,
-     * returns an empty list.
+     * Full-text search on {@code game_title} and {@code platform} (PostgreSQL {@code tsvector}). Returns an empty list
+     * when {@code query} is blank. Optional {@code platform} narrows results. Sorted by {@code bestPricePhp} (default
+     * {@code price_asc}); games with no prices ({@code null} best price) are listed last.
      */
-    public List<GameSummaryDto> searchGames(String query, String platform) {
+    public List<GameSummaryDto> searchGames(String query, String platform, String sort) {
         String q = query == null ? "" : query.trim();
         String p = platform == null ? "" : platform.trim();
 
-        List<Game> games;
-        if (!q.isEmpty() && !p.isEmpty()) {
-            games = gameRepository.findByGameTitleContainingIgnoreCaseAndPlatform(q, p);
-        } else if (!q.isEmpty()) {
-            games = gameRepository.findByGameTitleContainingIgnoreCase(q);
-        } else if (!p.isEmpty()) {
-            games = gameRepository.findByPlatform(p);
-        } else {
+        if (q.isEmpty()) {
             return List.of();
         }
+
+        List<Game> games =
+                p.isEmpty()
+                        ? gameRepository.searchByFullText(q)
+                        : gameRepository.searchByFullTextAndPlatform(q, p);
 
         List<GameSummaryDto> out = new ArrayList<>(games.size());
         for (Game g : games) {
@@ -57,7 +56,27 @@ public class GameService {
                             .bestPricePhp(best.orElse(null))
                             .build());
         }
+        out.sort(priceSortComparator(parseSearchSort(sort)));
         return out;
+    }
+
+    private static String parseSearchSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return "price_asc";
+        }
+        String normalized = sort.trim().toLowerCase(Locale.ROOT);
+        if (!normalized.equals("price_asc") && !normalized.equals("price_desc")) {
+            throw new IllegalArgumentException("sort must be 'price_asc' or 'price_desc'");
+        }
+        return normalized;
+    }
+
+    private static Comparator<GameSummaryDto> priceSortComparator(String sort) {
+        Comparator<BigDecimal> priceOrder =
+                "price_desc".equals(sort)
+                        ? Comparator.nullsLast(Comparator.reverseOrder())
+                        : Comparator.nullsLast(Comparator.naturalOrder());
+        return Comparator.comparing(GameSummaryDto::getBestPricePhp, priceOrder);
     }
 
     /** Returns one game by id, or throws {@link ResourceNotFoundException} if missing. */
