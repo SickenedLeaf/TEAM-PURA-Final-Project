@@ -55,6 +55,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
+    @ExceptionHandler(WishlistAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleWishlistDuplicate(WishlistAlreadyExistsException ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "wishlist_already_exists");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
         Map<String, String> body = new HashMap<>();

@@ -133,7 +133,7 @@
   - Cache the rate in memory for 24 hours to avoid excessive API calls
 - [x] Integrate `ForexService` into the scraper/aggregation layer
 - [x] Every non-PHP price must be converted before storing in the `prices` table
-- [ ] Test with a USD price — confirm it is stored as PHP in the DB
+- [x] Test with a USD price — confirm it is stored as PHP in the DB
 
 ---
 
@@ -164,15 +164,15 @@
 *Goal: Authenticated users can manage a wishlist.*
 *Depends on: Milestone 3 (auth) and Milestone 4 (game data)*
 
-- [ ] Create `WishlistService.java`:
+- [x] Create `WishlistService.java`:
   - `getWishlist(Integer userId)` — returns user's wishlist
   - `addToWishlist(Integer userId, Integer gameId, BigDecimal alertThreshold)` — adds entry
   - `removeFromWishlist(Integer userId, Integer gameId)` — removes entry
-- [ ] Create `WishlistController.java`:
+- [x] Create `WishlistController.java`:
   - `GET /api/wishlist` — returns wishlist for authenticated user (JWT required)
   - `POST /api/wishlist/{gameId}` — add to wishlist, optional alert threshold in body (JWT required)
   - `DELETE /api/wishlist/{gameId}` — remove from wishlist (JWT required)
-- [ ] Price drop notification (basic): after each aggregation run, check if any wishlisted game dropped below a user's threshold — log it for now (email can be added later)
+- [x] Price drop notification (basic): after each aggregation run, check if any wishlisted game dropped below a user's threshold — log it for now (email can be added later) *(via `WishlistPriceAlertService`, called from `AggregationService.runFullUpdate()`.)*
 - [ ] Test all wishlist endpoints in Postman with a valid JWT
 
 ---

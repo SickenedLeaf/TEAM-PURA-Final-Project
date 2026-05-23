@@ -38,7 +38,7 @@ public class SecurityConfig {
                         auth ->
                                 auth.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login")
                                         .permitAll()
-                                        .requestMatchers("/api/auth/me")
+                                        .requestMatchers("/api/auth/me", "/api/wishlist", "/api/wishlist/**")
                                         .authenticated()
                                         .anyRequest()
                                         .permitAll())
