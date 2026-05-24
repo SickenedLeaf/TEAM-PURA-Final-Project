@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -32,6 +33,15 @@ public abstract class GenericScraper {
         this.storeName = storeName;
         this.sitemapIndexURL = sitemapIndexURL;
         this.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+    }
+
+    protected Connection openBrowserLikeConnection(String url) throws IOException {
+        return Jsoup.connect(url)
+            .userAgent(this.userAgent)
+            .header("Accept-Language", "en-US,en;q=0.9")
+            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+            .referrer("https://www.google.com")
+            .timeout(10000);
     }
 
     // ==========================================
@@ -131,13 +141,112 @@ public abstract class GenericScraper {
         }
     }
 
+    protected String resolveHighestQualityImage(Element element) {
+        if (element == null) {
+            return "";
+        }
+
+        String srcset = firstNonBlank(
+            element.attr("data-srcset"),
+            element.attr("srcset"),
+            element.attr("data-lazy-srcset"),
+            element.attr("data-set")
+        );
+
+        if (!srcset.isBlank()) {
+            String best = selectBestUrlFromSrcSet(srcset);
+            if (!best.isBlank()) {
+                return normalizeImageUrl(best);
+            }
+        }
+
+        for (String attr : new String[]{"data-src", "data-zoom-image", "data-image-src", "data-src-full", "src"}) {
+            String candidate = element.attr(attr).trim();
+            if (!candidate.isBlank()) {
+                return normalizeImageUrl(candidate);
+            }
+        }
+
+        return "";
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return "";
+    }
+
+    private String selectBestUrlFromSrcSet(String srcset) {
+        String bestUrl = "";
+        int bestScore = -1;
+
+        for (String candidate : srcset.split(",")) {
+            String trimmed = candidate.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+
+            String[] parts = trimmed.split("\\s+");
+            String url = parts[0].trim();
+            int score = -1;
+
+            if (parts.length > 1) {
+                String descriptor = parts[parts.length - 1].trim();
+                if (descriptor.endsWith("w")) {
+                    try {
+                        score = Integer.parseInt(descriptor.substring(0, descriptor.length() - 1));
+                    } catch (NumberFormatException ignored) {
+                    }
+                } else if (descriptor.endsWith("x")) {
+                    try {
+                        score = Integer.parseInt(descriptor.substring(0, descriptor.length() - 1)) * 1000;
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestUrl = url;
+            } else if (bestScore == -1 && !url.isBlank()) {
+                bestUrl = url;
+            }
+        }
+
+        if (bestUrl.isBlank()) {
+            String[] fallback = srcset.split(",");
+            if (fallback.length > 0) {
+                String last = fallback[fallback.length - 1].trim();
+                if (!last.isBlank()) {
+                    bestUrl = last.split("\\s+")[0].trim();
+                }
+            }
+        }
+
+        return bestUrl;
+    }
+
+    private String normalizeImageUrl(String url) {
+        if (url == null) {
+            return "";
+        }
+        String cleaned = url.trim();
+        if (cleaned.startsWith("//")) {
+            cleaned = "https:" + cleaned;
+        }
+        return cleaned;
+    }
+
     // ==========================================
     // PRIVATE INTERNAL PIPELINE FILTERS
     // ==========================================
     protected List<String> discoverSubSitemaps() {
         List<String> discoveredMaps = new ArrayList<>();
         try {
-            Document masterDoc = Jsoup.connect(sitemapIndexURL).userAgent(userAgent).timeout(10000).get();
+            Document masterDoc = openBrowserLikeConnection(sitemapIndexURL).get();
             Elements sitemapElements = masterDoc.select("sitemap loc");
             
             for (Element element : sitemapElements) {
@@ -161,7 +270,7 @@ public abstract class GenericScraper {
         List<String> filteredList = new ArrayList<>();
         for (String sitemapUrl : subSitemaps) {
             try {
-                Document sitemapDoc = Jsoup.connect(sitemapUrl).userAgent(userAgent).timeout(10000).get();
+                Document sitemapDoc = openBrowserLikeConnection(sitemapUrl).get();
                 Elements urlElements = sitemapDoc.select("loc");
 
                 for (Element element : urlElements) {

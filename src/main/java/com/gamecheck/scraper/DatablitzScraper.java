@@ -1,6 +1,5 @@
 package com.gamecheck.scraper;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import java.io.IOException;
@@ -25,10 +24,7 @@ public class DatablitzScraper extends GenericScraper {
     @Override
     protected Product scrapePage(String url) {
         try {
-            Document doc = Jsoup.connect(url)
-                                .userAgent(this.userAgent)
-                                .timeout(10000)
-                                .get();
+            Document doc = openBrowserLikeConnection(url).get();
 
             // 1. Extract Heading Title Node (Shopify theme product selector)
             Element titleNode = doc.selectFirst("h1.product-meta__title.heading.h1");
@@ -41,32 +37,23 @@ public class DatablitzScraper extends GenericScraper {
             String productCode = this.generateUniqueCode(rawTitle);
             
             Element boxArtNode = doc.selectFirst(".aspect-ratio img.product-gallery__image, img.product-gallery__image");
-            if(boxArtNode == null) {
+            if (boxArtNode == null) {
                 System.err.println("[DataBlitz Skip] Unable to resolve box art at link: " + url);
                 return null;
             }
-            String boxArtUrl = "";
 
-            if (boxArtNode != null) {
-                String srcSetAttr = "";
-                
-                if (boxArtNode.hasAttr("data-srcset")) {
-                    srcSetAttr = boxArtNode.attr("data-srcset").trim();
-                } else if (boxArtNode.hasAttr("srcset")) {
-                    srcSetAttr = boxArtNode.attr("srcset").trim();
-                }
-
-                if (!srcSetAttr.isEmpty()) {
-                    String[] sets = srcSetAttr.split(",");
-                    String bestPick = sets[Math.min(sets.length - 1, 2)].trim(); 
-                    boxArtUrl = bestPick.split("\\s+")[0].trim();
-                } else if (boxArtNode.hasAttr("src")) {
-                    boxArtUrl = boxArtNode.attr("src").trim();
-                }
+            String boxArtUrl = resolveHighestQualityImage(boxArtNode);
+            if (boxArtUrl.isEmpty() && boxArtNode.hasAttr("src")) {
+                boxArtUrl = boxArtNode.attr("src").trim();
             }
 
             if (boxArtUrl.startsWith("//")) {
                 boxArtUrl = "https:" + boxArtUrl;
+            }
+
+            if (boxArtUrl.isEmpty()) {
+                System.err.println("[DataBlitz Skip] Unable to resolve high-res box art at link: " + url);
+                return null;
             }
 
             // 3. Extract Pricing Block Element

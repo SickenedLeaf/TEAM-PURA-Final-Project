@@ -1,6 +1,5 @@
 package com.gamecheck.scraper;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import java.io.IOException;
@@ -31,10 +30,7 @@ public class ITechScraper extends GenericScraper {
 
         try {
             // Execute connection using the inherited base configurations
-            Document doc = Jsoup.connect(url)
-                                .userAgent(this.userAgent)
-                                .timeout(12000) // Slightly bumped timeout limit for stability
-                                .get();
+            Document doc = openBrowserLikeConnection(url).get();
 
             // 1. Extract Title Node
             Element titleNode = doc.selectFirst("h1.product_title");
@@ -48,12 +44,28 @@ public class ITechScraper extends GenericScraper {
             String productCode = this.generateUniqueCode(rawTitle);
 
             // 3. Extract Box Art URL
-            Element boxArtNode = doc.selectFirst(".xts-col-inner a[href*='/uploads/']");
-            if(boxArtNode == null) {
+            Element boxArtNode = doc.selectFirst(".xts-col-inner a[href*='/uploads/'] img, .xts-col-inner img, img[srcset], img[data-srcset], img[data-lazy-srcset]");
+            String boxArtUrl = "";
+
+            if (boxArtNode != null) {
+                boxArtUrl = resolveHighestQualityImage(boxArtNode);
+            }
+
+            if (boxArtUrl.isBlank()) {
+                Element fallbackAnchor = doc.selectFirst(".xts-col-inner a[href*='/uploads/']");
+                if (fallbackAnchor != null && fallbackAnchor.hasAttr("href")) {
+                    boxArtUrl = fallbackAnchor.attr("href").trim();
+                }
+            }
+
+            if (boxArtUrl.startsWith("//")) {
+                boxArtUrl = "https:" + boxArtUrl;
+            }
+
+            if (boxArtUrl.isBlank()) {
                 System.err.println("[iTech Skip] Unable to resolve box art at link: " + url);
                 return null;
             }
-            String boxArtUrl = boxArtNode.attr("href").trim();
             
             // 4. Extract Pricing Block Element safely
             Element priceNode = doc.selectFirst("p.price");
