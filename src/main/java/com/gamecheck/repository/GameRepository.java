@@ -2,6 +2,7 @@ package com.gamecheck.repository;
 
 import com.gamecheck.model.Game;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +29,6 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
           """,
       nativeQuery = true)
   List<Game> searchByFullTextAndPlatform(@Param("query") String query, @Param("platform") String platform);
+
+  Optional<Game> findByProductCode(String productCode);
 }

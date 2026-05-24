@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PriceRecord {
 
+    private String productCode;
     private String gameTitle;
     private String platform;
     private BigDecimal priceOriginal;

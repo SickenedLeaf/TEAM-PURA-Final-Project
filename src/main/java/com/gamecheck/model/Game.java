@@ -29,6 +29,9 @@ public class Game {
     @Column(name = "game_title", nullable = false)
     private String gameTitle;
 
+    @Column(name = "product_code", length = 8, unique = true)
+    private String productCode;
+
     @Column(nullable = false, length = 50)
     private String platform;
 
