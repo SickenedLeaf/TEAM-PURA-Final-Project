@@ -32,6 +32,7 @@ public class ProductMapper {
             .currencyCode("PHP")
             .listingUrl(product.getUrl())
             .sourceName(product.getStoreName())
+            .imageUrl(product.getBoxArtUrl())
             .build();
 
         return Optional.of(record);

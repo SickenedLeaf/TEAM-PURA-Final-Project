@@ -1,4 +1,4 @@
-package com.gamecheck.scraper;
+package ScrapeSystem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -46,16 +46,15 @@ public class ITechScraper extends GenericScraper {
 
             // 2. Compute Unique Code ID
             String productCode = this.generateUniqueCode(rawTitle);
-
-            // 3. Extract Box Art URL
+            
             Element boxArtNode = doc.selectFirst(".xts-col-inner a[href*='/uploads/']");
             if(boxArtNode == null) {
-                System.err.println("[iTech Skip] Unable to resolve box art at link: " + url);
-                return null;
+            	System.err.println("[iTech Skip] Unable to resolve box art at link: " + url);
+            	return null;
             }
             String boxArtUrl = boxArtNode.attr("href").trim();
             
-            // 4. Extract Pricing Block Element safely
+            // 3. Extract Pricing Block Element safely
             Element priceNode = doc.selectFirst("p.price");
             String price = "₱0.00";
             

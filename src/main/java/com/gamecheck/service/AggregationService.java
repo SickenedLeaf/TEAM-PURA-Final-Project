@@ -90,6 +90,13 @@ public class AggregationService {
         Game game = gameRepository.findByProductCode(priceRecord.getProductCode())
             .orElseGet(() -> createGameFromPriceRecord(priceRecord));
 
+        // Persist cover image into Game only when absent in DB and available from scraper
+        if ((game.getCoverImageUrl() == null || game.getCoverImageUrl().isBlank())
+            && priceRecord.getImageUrl() != null && !priceRecord.getImageUrl().isBlank()) {
+            game.setCoverImageUrl(priceRecord.getImageUrl());
+            gameRepository.save(game);
+        }
+
         BigDecimal pricePhp = priceConverter.toStoredPricePhp(priceRecord.getPriceOriginal(), priceRecord.getCurrencyCode())
             .setScale(2, RoundingMode.HALF_UP);
 
@@ -116,6 +123,7 @@ public class AggregationService {
             .platform(priceRecord.getPlatform() == null || priceRecord.getPlatform().isBlank()
                 ? "Nintendo Switch"
                 : priceRecord.getPlatform())
+            .coverImageUrl((priceRecord.getImageUrl() == null || priceRecord.getImageUrl().isBlank()) ? null : priceRecord.getImageUrl())
             .build();
 
         Game savedGame = gameRepository.save(game);

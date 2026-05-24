@@ -1,4 +1,4 @@
-package com.gamecheck.scraper;
+package ScrapeSystem;
 
 /**
  * Represents the finalized parameter data scraped from a retailer page.
@@ -64,7 +64,7 @@ public class Product {
         return url;
     }
     public String getBoxArtUrl() {
-        return boxArtUrl;
+    	return boxArtUrl;
     }
 
     // ==========================================
@@ -83,16 +83,17 @@ public class Product {
     public String toJson() {
         String cleanTitle = (this.title != null) ? this.title : "Unknown Title";
         cleanTitle = cleanTitle.replace("\\", "\\\\").replace("\"", "\\\"");
+       
 
-         return "    {\n" +
-             "      \"productCode\": \"" + this.productCode + "\",\n" +
-             "      \"title\": \"" + cleanTitle + "\",\n" +
-             "      \"platform\": \"" + this.platform + "\",\n" +
-             "      \"price\": \"" + this.price + "\",\n" +
-             "      \"isAvailable\": " + this.isAvailable + ",\n" +
-             "      \"storeName\": \"" + this.storeName + "\",\n" +
-             "      \"url\": \"" + this.url + "\",\n" +
-             "      \"imageUrl\": \"" + (this.boxArtUrl == null ? "" : this.boxArtUrl) + "\"\n" +
-             "    }";
+        return "    {\n" +
+               "      \"productCode\": \"" + this.productCode + "\",\n" +
+               "      \"title\": \"" + cleanTitle + "\",\n" +
+               "      \"platform\": \"" + this.platform + "\",\n" +
+               "      \"price\": \"" + this.price + "\",\n" +
+               "      \"isAvailable\": " + this.isAvailable + ",\n" +
+               "      \"storeName\": \"" + this.storeName + "\",\n" +
+               "      \"url\": \"" + this.url + "\",\n" +
+               "      \"imageUrl\": \"" + this.boxArtUrl + "\"\n" +
+               "    }";
     }
 }

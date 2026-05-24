@@ -1,4 +1,4 @@
-package com.gamecheck.scraper;
+package ScrapeSystem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -42,14 +42,15 @@ public class DatablitzScraper extends GenericScraper {
             
             Element boxArtNode = doc.selectFirst(".aspect-ratio img.product-gallery__image, img.product-gallery__image");
             if(boxArtNode == null) {
-                System.err.println("[DataBlitz Skip] Unable to resolve box art at link: " + url);
-                return null;
+            	System.err.println("[DataBlitz Skip] Unable to resolve box art at link: " + url);
+            	return null;
             }
             String boxArtUrl = "";
 
             if (boxArtNode != null) {
                 String srcSetAttr = "";
                 
+                // Check both lazy-load variants and native responsive structures
                 if (boxArtNode.hasAttr("data-srcset")) {
                     srcSetAttr = boxArtNode.attr("data-srcset").trim();
                 } else if (boxArtNode.hasAttr("srcset")) {
@@ -57,14 +58,20 @@ public class DatablitzScraper extends GenericScraper {
                 }
 
                 if (!srcSetAttr.isEmpty()) {
+                    // Shopify splits multiple resolutions via commas: "//cdn..._600x.jpg 600w, //cdn..._700x.jpg 700w"
                     String[] sets = srcSetAttr.split(",");
+                    // Grab one of the high-res variations from the upper bounds of the array if available
                     String bestPick = sets[Math.min(sets.length - 1, 2)].trim(); 
+                    
+                    // Isolate the pure URL by splitting away the width descriptor suffix (e.g., " 700w")
                     boxArtUrl = bestPick.split("\\s+")[0].trim();
                 } else if (boxArtNode.hasAttr("src")) {
+                    // Safe fallback to native source tag
                     boxArtUrl = boxArtNode.attr("src").trim();
                 }
             }
 
+            // Ensure the URL template includes a proper network protocol prefix if Shopify serves it as a relative schemeless URL (//cdn...)
             if (boxArtUrl.startsWith("//")) {
                 boxArtUrl = "https:" + boxArtUrl;
             }
@@ -82,6 +89,7 @@ public class DatablitzScraper extends GenericScraper {
                     isAvailable = false;
                 }
             } else {
+                // Fallback: If the "In Stock" badge is completely missing from the HTML structure, flag it out of stock
                 isAvailable = false; 
             }
             

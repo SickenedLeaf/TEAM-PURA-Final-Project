@@ -20,4 +20,5 @@ public class PriceRecord {
     private String currencyCode;
     private String listingUrl;
     private String sourceName;
+    private String imageUrl;
 }
