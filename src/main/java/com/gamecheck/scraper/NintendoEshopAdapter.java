@@ -47,6 +47,23 @@ public class NintendoEshopAdapter implements SourceAdapter {
             JsonNode root = objectMapper.readTree(jsonResponse);
             JsonNode games = root.path("response").path("docs");
 
+            // Temporary debug: log the field names (keys) of the first game object
+            if (games.isArray() && games.size() > 0) {
+                JsonNode first = games.get(0);
+                StringBuilder keys = new StringBuilder();
+                keys.append("[Nintendo eShop][DEBUG] First game fields: ");
+                Iterator<String> fieldIt = first.fieldNames();
+                boolean firstField = true;
+                while (fieldIt.hasNext()) {
+                    if (!firstField) {
+                        keys.append(", ");
+                    }
+                    keys.append(fieldIt.next());
+                    firstField = false;
+                }
+                System.out.println(keys.toString());
+            }
+
             for (JsonNode game : games) {
                 // Extract game title (prefer title_extras_txt, fallback to title)
                 String title = game.path("title_extras_txt").asText();
