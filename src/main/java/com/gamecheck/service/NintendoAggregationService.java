@@ -31,16 +31,22 @@ import java.util.stream.Collectors;
 public class NintendoAggregationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NintendoAggregationService.class);
-    private static final double USD_TO_PHP_RATE = 56.0;
+    private static final double FALLBACK_USD_TO_PHP_RATE = 56.0;
     private static final String NINTENDO_US_ALGOLIA_APP_ID = "U3B6MG4I2R";
     private static final String NINTENDO_US_ALGOLIA_API_KEY = "9fa3d63fbd3d277a9ec5536159da3248";
     private static final String NINTENDO_US_ALGOLIA_INDEX = "ncom_game_us_en_title";
+    private static final String FOREX_API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
+    private static final long CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
     private final GameRepository gameRepository;
     private final PriceRepository priceRepository;
     private final SourceRepository sourceRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    
+    // Cache for exchange rate
+    private Double cachedUsdToPhpRate = null;
+    private long rateCacheTimestamp = 0;
 
     public NintendoAggregationService(GameRepository gameRepository, PriceRepository priceRepository, SourceRepository sourceRepository) {
         this.gameRepository = gameRepository;
@@ -121,9 +127,49 @@ public class NintendoAggregationService {
         return sourceRepository.save(newSource);
     }
 
-    // Convert USD to PHP using fixed rate
+    // Convert USD to PHP using cached or live exchange rate
     private BigDecimal convertUsdToPhp(BigDecimal usdPrice) {
-        return usdPrice.multiply(new BigDecimal(USD_TO_PHP_RATE));
+        double rate = getUsdToPhpRate();
+        return usdPrice.multiply(new BigDecimal(rate));
+    }
+
+    // Get USD to PHP exchange rate with caching
+    private double getUsdToPhpRate() {
+        long currentTime = System.currentTimeMillis();
+        
+        // Return cached rate if still valid (within 1 hour)
+        if (cachedUsdToPhpRate != null && (currentTime - rateCacheTimestamp) < CACHE_DURATION_MS) {
+            return cachedUsdToPhpRate;
+        }
+        
+        // Fetch live rate from Forex API
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(FOREX_API_URL, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode rates = root.path("rates");
+                JsonNode phpRate = rates.path("PHP");
+                
+                if (phpRate != null && !phpRate.isMissingNode()) {
+                    double rate = phpRate.asDouble();
+                    cachedUsdToPhpRate = rate;
+                    rateCacheTimestamp = currentTime;
+                    logger.info("Updated USD to PHP exchange rate: {}", rate);
+                    return rate;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to fetch live exchange rate, using fallback: {}", e.getMessage());
+        }
+        
+        // Fallback to hardcoded rate if API fails
+        if (cachedUsdToPhpRate == null) {
+            cachedUsdToPhpRate = FALLBACK_USD_TO_PHP_RATE;
+            rateCacheTimestamp = currentTime;
+        }
+        
+        return cachedUsdToPhpRate;
     }
 
     // Fetch games from Nintendo US eShop Algolia API
