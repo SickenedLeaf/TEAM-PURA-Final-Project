@@ -3,6 +3,7 @@
     const API_BASE_URL = 'https://team-pura-final-project-production.up.railway.app/api';
     let currentPage = 1;
     let filteredGames = [];
+    let cachedGames = []; // Cache for fetched games to avoid redundant API calls
     let isLoading = false;
     let abortController = null; // For cancelling pending requests
     let debounceTimer = null; // For debouncing input events
@@ -14,15 +15,11 @@
     const searchInput  = document.getElementById('searchInput');
     const filterPlatform = document.getElementById('filterPlatform');
     const filterFormat = document.getElementById('filterFormat');
+    const loadingText  = document.getElementById('loadingText');
 
     // ── Render Cards ───────────────────────────────────────────
     function renderGames(games) {
       grid.innerHTML = '';
-
-      if (isLoading) {
-        grid.innerHTML = '<p class="loading">Loading...</p>';
-        return;
-      }
 
       if (games.length === 0) {
         grid.innerHTML = '<p class="no-results">No games match your search.</p>';
@@ -152,32 +149,26 @@
       });
     }
 
-    // ── Apply Filters (API Call + Unified Filter Pipeline) ────────
-    async function applyFilters() {
+    // ── Fetch Games from API ─────────────────────────────────────
+    // Fetches games from API and updates cache
+    async function fetchGames(query) {
       // Cancel any pending request
       if (abortController) {
         abortController.abort();
       }
       abortController = new AbortController();
 
-      // Read all inputs simultaneously - single source of truth
-      const query = searchInput.value.trim();
-      const platform = filterPlatform ? filterPlatform.value : 'all';
-      const format = filterFormat ? filterFormat.value : 'all';
-
-      isLoading = true;
-      renderGames([]); // Show loading state
+      // Show loading indicator
+      if (loadingText) {
+        loadingText.style.display = 'block';
+      }
+      grid.innerHTML = '';
 
       try {
-        // Build API URL - send query to backend (backend returns all games when query is empty)
+        // Build API URL - send query to backend
         const params = new URLSearchParams();
         params.append('query', query || '');
         
-        // Only add platform filter if it's not a placeholder value
-        if (platform && platform !== 'all' && platform !== 'Platform') {
-          params.append('platform', platform);
-        }
-
         const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`, {
           signal: abortController.signal
         });
@@ -187,44 +178,80 @@
         }
 
         const data = await response.json();
+        
+        // Update cache
+        cachedGames = data;
 
-        // Pass all data through unified filter pipeline with current input values
-        filteredGames = filterGames(data, query, platform, format);
+        // Hide loading indicator
+        if (loadingText) {
+          loadingText.style.display = 'none';
+        }
 
-        isLoading = false; // Clear loading state before rendering
-        currentPage = 1;
-        renderGames(filteredGames);
-        renderPagination(filteredGames.length);
-        updateCount(filteredGames.length);
+        return data;
 
       } catch (error) {
-        // Ignore aborted requests (user typed again before request completed)
+        // Hide loading indicator on error
+        if (loadingText) {
+          loadingText.style.display = 'none';
+        }
+
+        // Ignore aborted requests
         if (error.name === 'AbortError') {
-          return;
+          return null;
         }
         
         console.error('Failed to fetch games:', error);
-        isLoading = false; // Clear loading state on error
         grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
-        filteredGames = [];
-        renderPagination(0);
-        updateCount(0);
+        return null;
       }
     }
 
+    // ── Apply Filters (Uses Cache or Fetches) ────────────────────
+    // Main filter function - uses cache if available, fetches if needed
+    async function applyFilters(shouldFetch = false) {
+      // Read all inputs simultaneously - single source of truth
+      const query = searchInput.value.trim();
+      const platform = filterPlatform ? filterPlatform.value : 'all';
+      const format = filterFormat ? filterFormat.value : 'all';
+
+      let gamesToFilter;
+
+      if (shouldFetch || cachedGames.length === 0) {
+        // Fetch from API (initial load or search input changed)
+        const fetchedData = await fetchGames(query);
+        if (fetchedData === null) {
+          // Request was aborted or failed
+          return;
+        }
+        gamesToFilter = fetchedData;
+      } else {
+        // Use cached data (dropdown change only)
+        gamesToFilter = cachedGames;
+      }
+
+      // Apply unified filter pipeline
+      filteredGames = filterGames(gamesToFilter, query, platform, format);
+
+      // Render results
+      currentPage = 1;
+      renderGames(filteredGames);
+      renderPagination(filteredGames.length);
+      updateCount(filteredGames.length);
+    }
+
     // ── Event Listeners ────────────────────────────────────────
-    // Debounced input listener for search bar to prevent excessive API calls
+    // Debounced input listener for search bar - triggers API fetch
     searchInput.addEventListener('input', () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(applyFilters, 300); // 300ms debounce
+      debounceTimer = setTimeout(() => applyFilters(true), 300); // 300ms debounce, fetch from API
     });
     
-    // Dropdown change listeners trigger immediately (no debounce needed)
+    // Dropdown change listeners - use cached data (no API call)
     if (filterPlatform) {
-      filterPlatform.addEventListener('change', applyFilters);
+      filterPlatform.addEventListener('change', () => applyFilters(false));
     }
     if (filterFormat) {
-      filterFormat.addEventListener('change', applyFilters);
+      filterFormat.addEventListener('change', () => applyFilters(false));
     }
 
     // Prevent drag on all images
@@ -240,5 +267,5 @@
     // Load default games on page load
     document.addEventListener('DOMContentLoaded', () => {
       searchInput.value = ''; // Start with empty query
-      applyFilters(); // Trigger initial fetch
+      applyFilters(true); // Trigger initial fetch from API
     });
