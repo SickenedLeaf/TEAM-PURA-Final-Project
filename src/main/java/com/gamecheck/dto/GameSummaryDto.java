@@ -1,6 +1,7 @@
 package com.gamecheck.dto;
 
 import java.math.BigDecimal;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +21,6 @@ public class GameSummaryDto {
     /** Lowest tracked price in PHP, or null if no price rows exist for this game. */
     private BigDecimal bestPricePhp;
     private String coverImageUrl;
+    /** All available source types for this game (physical, digital, or both). */
+    private Set<String> availableFormats;
 }

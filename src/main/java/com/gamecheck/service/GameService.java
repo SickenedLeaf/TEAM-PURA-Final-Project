@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class GameService {
     private final PriceRepository priceRepository;
 
     /**
-     * Full-text search on {@code game_title} and {@code platform} (PostgreSQL {@code tsvector}). Returns an empty list
+     * Full-text search on {@code game_title} and {@code platform} (PostgreSQL {@code tsvector}). Returns all games
      * when {@code query} is blank. Optional {@code platform} narrows results. Sorted by {@code bestPricePhp} (default
      * {@code price_asc}); games with no prices ({@code null} best price) are listed last.
      */
@@ -36,18 +37,22 @@ public class GameService {
         String q = query == null ? "" : query.trim();
         String p = platform == null ? "" : platform.trim();
 
+        List<Game> games;
         if (q.isEmpty()) {
-            return List.of();
+            // When query is empty, return all games (optionally filtered by platform)
+            games = p.isEmpty()
+                    ? gameRepository.findAll()
+                    : gameRepository.findByPlatform(p);
+        } else {
+            games = p.isEmpty()
+                    ? gameRepository.searchByFullText(q)
+                    : gameRepository.searchByFullTextAndPlatform(q, p);
         }
-
-        List<Game> games =
-                p.isEmpty()
-                        ? gameRepository.searchByFullText(q)
-                        : gameRepository.searchByFullTextAndPlatform(q, p);
 
         List<GameSummaryDto> out = new ArrayList<>(games.size());
         for (Game g : games) {
             Optional<BigDecimal> best = priceRepository.findMinPricePhpByGame_GameId(g.getGameId());
+            Set<String> availableFormats = priceRepository.findSourceTypesByGame_GameId(g.getGameId());
             out.add(
                     GameSummaryDto.builder()
                             .gameId(g.getGameId())
@@ -55,6 +60,7 @@ public class GameService {
                             .platform(g.getPlatform())
                             .bestPricePhp(best.orElse(null))
                             .coverImageUrl(g.getCoverImageUrl())
+                            .availableFormats(availableFormats)
                             .build());
         }
         out.sort(priceSortComparator(parseSearchSort(sort)));

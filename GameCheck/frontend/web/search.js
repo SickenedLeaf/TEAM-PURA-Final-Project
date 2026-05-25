@@ -11,6 +11,7 @@
     const countEl      = document.getElementById('resultsCount');
     const searchInput  = document.getElementById('searchInput');
     const filterPlatform = document.getElementById('filterPlatform');
+    const filterFormat = document.getElementById('filterFormat');
 
     // ── Render Cards ───────────────────────────────────────────
     function renderGames(games) {
@@ -128,6 +129,7 @@
     async function applyFilters() {
       const query = searchInput.value.trim();
       const platform = filterPlatform ? filterPlatform.value : 'all';
+      const format = filterFormat ? filterFormat.value : 'all';
 
       isLoading = true;
       renderGames([]); // Show loading state
@@ -150,24 +152,23 @@
 
         const data = await response.json();
 
-        // NOTE: Format filter is disabled because the search API (/api/games/search)
-        // does not return format/sourceType information in GameSummaryDto.
-        // Format data is only available via the separate /api/games/{id}/prices endpoint.
-        // The Format dropdown in the UI is currently non-functional for search results.
-
-        // Apply client-side platform filtering with exact match
-        // HTML values now match backend database strings exactly
+        // Apply client-side platform and format filtering with explicit placeholder bypass
         filteredGames = data.filter(game => {
-          // Platform filter - case-insensitive equality check
-          if (platform && platform !== 'all' && platform !== 'Platform') {
-            const gamePlatform = (game.platform || '').toLowerCase();
-            const selectedPlatform = platform.toLowerCase();
-            if (gamePlatform !== selectedPlatform) {
-              return false;
-            }
-          }
+          const platformValue = platform;
+          const formatValue = format;
+          
+          // Explicitly bypass placeholder values for platform
+          const matchesPlatform = (platformValue === 'Platform' || platformValue === '' || platformValue === 'all')
+            ? true
+            : game.platform.toLowerCase() === platformValue.toLowerCase();
 
-          return true;
+          // Explicitly bypass placeholder values for format
+          // Check if the game has the selected format in its available formats
+          const matchesFormat = (formatValue === 'Format' || formatValue === '' || formatValue === 'all')
+            ? true
+            : game.availableFormats && game.availableFormats.some(f => f.toLowerCase() === formatValue.toLowerCase());
+
+          return matchesPlatform && matchesFormat;
         });
 
         isLoading = false; // Clear loading state before rendering
@@ -190,6 +191,9 @@
     searchInput.addEventListener('input', applyFilters);
     if (filterPlatform) {
       filterPlatform.addEventListener('change', applyFilters);
+    }
+    if (filterFormat) {
+      filterFormat.addEventListener('change', applyFilters);
     }
 
     // Prevent drag on all images

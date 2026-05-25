@@ -30,5 +30,7 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
       nativeQuery = true)
   List<Game> searchByFullTextAndPlatform(@Param("query") String query, @Param("platform") String platform);
 
+  List<Game> findByPlatform(String platform);
+
   Optional<Game> findByProductCode(String productCode);
 }
