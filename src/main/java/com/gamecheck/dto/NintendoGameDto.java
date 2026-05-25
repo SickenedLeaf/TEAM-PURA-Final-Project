@@ -19,4 +19,5 @@ public class NintendoGameDto {
     private BigDecimal price;
     private String url;
     private String coverImageUrl;
+    private String platform;
 }

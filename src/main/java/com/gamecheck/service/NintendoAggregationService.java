@@ -101,7 +101,7 @@ public class NintendoAggregationService {
                 // Game doesn't exist in our database - create it as a digital-exclusive game
                 Game newGame = new Game();
                 newGame.setGameTitle(nintendoGame.getTitle());
-                newGame.setPlatform("Nintendo Switch");
+                newGame.setPlatform(nintendoGame.getPlatform());
                 newGame.setCoverImageUrl(nintendoGame.getCoverImageUrl());
                 
                 Game savedGame = gameRepository.save(newGame);
@@ -267,11 +267,18 @@ public class NintendoAggregationService {
                             coverImageUrl = "https://assets.nintendo.com/image/upload/f_auto,q_auto/ncom/en_US/" + coverImageUrl;
                         }
                         
+                        // Extract platform
+                        String platform = hit.path("platform").asText();
+                        if (platform == null || platform.isBlank()) {
+                            platform = "Nintendo Switch";
+                        }
+                        
                         NintendoGameDto dto = NintendoGameDto.builder()
                             .title(title)
                             .price(price)
                             .url(url)
                             .coverImageUrl(coverImageUrl)
+                            .platform(platform)
                             .build();
                         
                         games.add(dto);
