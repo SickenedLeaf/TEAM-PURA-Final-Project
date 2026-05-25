@@ -52,7 +52,11 @@ public class NintendoAggregationService {
         this.gameRepository = gameRepository;
         this.priceRepository = priceRepository;
         this.sourceRepository = sourceRepository;
+        
+        // Configure RestTemplate with UTF-8 encoding
         this.restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(0, new org.springframework.http.converter.StringHttpMessageConverter(java.nio.charset.StandardCharsets.UTF_8));
+        
         this.objectMapper = new ObjectMapper();
     }
 
@@ -247,6 +251,8 @@ public class NintendoAggregationService {
                         String url = hit.path("url").asText();
                         if (url == null || url.isBlank()) {
                             url = "https://www.nintendo.com/store/games/";
+                        } else if (!url.startsWith("http")) {
+                            url = "https://www.nintendo.com" + url;
                         }
                         
                         // Extract cover image URL (productImage or boxart)
@@ -256,6 +262,9 @@ public class NintendoAggregationService {
                         }
                         if (coverImageUrl == null || coverImageUrl.isBlank()) {
                             coverImageUrl = hit.path("image_url").asText();
+                        }
+                        if (coverImageUrl != null && !coverImageUrl.isBlank() && !coverImageUrl.startsWith("http")) {
+                            coverImageUrl = "https://assets.nintendo.com/image/upload/ncom/en_US/" + coverImageUrl;
                         }
                         
                         NintendoGameDto dto = NintendoGameDto.builder()
