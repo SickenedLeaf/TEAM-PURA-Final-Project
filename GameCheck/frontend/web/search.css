@@ -1,0 +1,338 @@
+/* ===== FONTS ===== */
+@font-face {
+  font-family: 'FuturaPt-Demi';
+  src: local('FuturaPT-Demi'), local('Futura PT Demi'), local('FuturaPt-Demi'),
+       url('/fonts/FuturaPtDemi.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'FuturaPt-Bold';
+  src: local('FuturaPT-Bold'), local('Futura PT Bold'), local('FuturaPt-Bold'),
+       url('/fonts/FuturaPtBold.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0; border: none;
+  background: none;
+  -webkit-font-smoothing: antialiased;
+}
+menu, ol, ul { list-style-type: none; }
+img, svg, video { -webkit-user-drag: none; user-select: none; }
+
+/* ===== VARIABLES ===== */
+:root {
+  --dark:  #262525;
+  --light: #d9d9d9;
+  --white: #ffffff;
+  --green: #4CAF50;
+}
+
+/* ===== PAGE FADE-IN ===== */
+body {
+  background: var(--light);
+  color: var(--dark);
+  font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
+  animation: pageFadeIn 0.6s ease both;
+}
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--dark);
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+
+/* Back Button — uses searchBackButton.svg */
+.back-btn {
+  width: clamp(48px, 5vw, 72px);
+  height: auto;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+              filter 0.2s ease;
+  flex-shrink: 0;
+}
+.back-btn:hover {
+  transform: scale(1.08) translateX(-3px);
+  filter: brightness(1.2);
+}
+.back-btn:active { transform: scale(0.95); }
+
+/* Centered logo */
+.header-logo-wrap {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.header-logo {
+  height: clamp(36px, 5vw, 55px);
+  width: auto;
+}
+
+/* Right spacer to balance layout */
+.header-spacer {
+  width: clamp(70px, 9vw, 116px);
+  flex-shrink: 0;
+}
+
+/* ===== MAIN WRAPPER ===== */
+.search-page-wrapper {
+  width: 100%;             /* ← always full browser width */
+  padding-top: clamp(1.5rem, 3vw, 3rem);  /* ← only top padding */
+}
+
+/* ===== SEARCH SHELF (Dark Panel) ===== */
+.search-shelf {
+  background: var(--dark);
+  border-radius: 50px 50px 0 0;
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 4rem) clamp(1rem, 2vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar-container {
+  background: var(--light);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(1rem, 2vw, 1.8rem);
+  height: clamp(52px, 6vw, 75px);
+  gap: 12px;
+}
+.search-bar-container input {
+  flex: 1;
+  font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
+  font-size: clamp(15px, 1.8vw, 22px);
+  color: var(--dark);
+  outline: none;
+  background: none;
+  border: none;
+}
+.search-bar-container input::placeholder { color: #888; }
+
+/* Search icon (matches searchBar.svg icon path) */
+.search-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.search-icon-btn:hover { transform: scale(1.15); }
+.search-icon-btn svg {
+  width: clamp(22px, 2.5vw, 34px);
+  height: auto;
+  fill: var(--dark);
+  pointer-events: none;
+}
+
+/* ===== FILTERS ===== */
+.filters-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1.5vw, 20px);
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  padding-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+.filters-label {
+  color: var(--white);
+  font-family: 'FuturaPt-Demi', sans-serif;
+  font-size: clamp(14px, 1.5vw, 20px);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.dropdown-pill {
+  background: var(--light);
+  color: var(--dark);
+  font-family: 'FuturaPt-Demi', sans-serif;
+  font-size: clamp(13px, 1.3vw, 18px);
+  padding: clamp(7px,1vw,10px) clamp(30px,3vw,44px) clamp(7px,1vw,10px) clamp(14px,1.5vw,20px);
+  border-radius: 999px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D"http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg" width%3D"12" height%3D"8"%3E%3Cpath fill%3D"%23262525" d%3D"M6 8L0 0h12z"%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px;
+  outline: none;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.dropdown-pill:hover {
+  filter: brightness(0.92);
+  transform: scale(1.03);
+}
+
+/* ===== RESULTS SECTION ===== */
+.results-section {
+  background: var(--dark);
+  padding: clamp(1.2rem, 2.5vw, 2.5rem) clamp(1.5rem, 4vw, 4rem) clamp(2rem, 4vw, 4rem);
+  min-height: 400px;
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(1rem, 2vw, 2rem);
+}
+.results-title {
+  color: var(--white);
+  font-family: 'FuturaPt-Demi', sans-serif;
+  font-size: clamp(14px, 1.5vw, 20px);
+  letter-spacing: 0.1em;
+}
+.results-count {
+  color: rgba(255,255,255,0.45);
+  font-size: clamp(12px, 1.2vw, 16px);
+  letter-spacing: 0.05em;
+}
+
+/* ===== GAME CARDS GRID ===== */
+/* 5 columns × 2 rows = 10 per page */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(16px, 2.5vw, 30px);
+  margin-bottom: clamp(1.5rem, 3vw, 3rem);
+}
+@media (max-width: 1100px) { .results-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 820px)  { .results-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px)  { .results-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Empty state */
+.no-results {
+  grid-column: 1 / -1;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  font-size: clamp(14px, 1.5vw, 20px);
+  padding: 4rem 0;
+  letter-spacing: 0.05em;
+}
+
+/* Game Card — matches gameCard.svg style */
+.game-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  animation: cardFadeIn 0.4s ease both;
+}
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.game-card-img {
+  width: 100%;
+  aspect-ratio: 203 / 253; /* matches gameCard.svg rect proportions */
+  background: var(--light);
+  border-radius: clamp(16px, 2.5vw, 37px);
+  margin-bottom: clamp(8px, 1vw, 14px);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.25s ease;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.game-card:hover .game-card-img {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.5);
+}
+
+.game-card-title {
+  color: var(--light);
+  font-family: 'FuturaPt-Demi', sans-serif;
+  font-size: clamp(12px, 1.2vw, 17px);
+  text-align: center;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+.game-card-price {
+  color: var(--green);
+  font-family: 'FuturaPt-Bold', sans-serif;
+  font-weight: 700;
+  font-size: clamp(12px, 1.1vw, 16px);
+  margin-bottom: 2px;
+}
+.game-card-meta {
+  color: rgba(217,217,217,0.5);
+  font-size: clamp(10px, 0.9vw, 13px);
+  text-align: center;
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 15px);
+  padding-top: clamp(1rem, 2vw, 2rem);
+}
+.pagination.hidden { display: none; }
+
+.page-num {
+  background: none;
+  color: var(--white);
+  border: 2px solid rgba(217,217,217,0.4);
+  width: clamp(34px, 4vw, 48px);
+  height: clamp(34px, 4vw, 48px);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'FuturaPt-Demi', sans-serif;
+  font-size: clamp(14px, 1.5vw, 20px);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease,
+              border-color 0.2s ease, transform 0.15s ease;
+}
+.page-num:hover {
+  background: rgba(217,217,217,0.15);
+  border-color: var(--light);
+  transform: scale(1.08);
+}
+.page-num.active {
+  background: var(--light);
+  color: var(--dark);
+  border-color: var(--light);
+  font-family: 'FuturaPt-Bold', sans-serif;
+}
+
+.page-dots {
+  color: rgba(217, 217, 217, 0.6);
+  font-family: 'FuturaPt-Bold', sans-serif;
+  font-size: clamp(14px, 1.5vw, 20px);
+  padding: 0 clamp(4px, 1vw, 8px);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 5px; /* Aligns dots with the text baseline of the buttons */
+  user-select: none;
+}

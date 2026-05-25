@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../web/gamePage.css" />
+  <title>GameCheck | Game Details</title>
+</head>
+<body>
+
+  <header class="header" id="header">
+    <div class="header-left">
+      <a href="../web/search.html" class="nav-link">
+        <img class="svg-btn" src="../svg/searchBackButton.svg" alt="Back" draggable="false" />
+      </a>
+      <a href="../web/hero.html" class="nav-link">
+        <img class="svg-btn home-btn" src="../svg/homeButton.svg" alt="Home" draggable="false" />
+      </a>
+    </div>
+
+    <div class="header-logo-wrap">
+      <img class="header-logo" src="../svg/title.svg" alt="GameCheck" draggable="false" />
+    </div>
+  </header>
+
+  <main class="game-details-wrapper">
+    <section class="game-hero">
+      <img class="game-picture" src="../svg/gamePic.svg" alt="Game Cover" draggable="false" />
+      <h1 class="game-title">GAME TITLE</h1>
+    </section>
+
+    <nav class="tabs-container">
+      <img class="tab-btn" data-target="pane-availability" src="../svg/availButton.svg" alt="Availability" draggable="false" />
+      <img class="tab-btn" data-target="pane-price" src="../svg/compareButton.svg" alt="Price Comparison" draggable="false" />
+      <img class="tab-btn" data-target="pane-platforms" src="../svg/platformButton.svg" alt="Platforms" draggable="false" />
+    </nav>
+
+    <section class="words-section" id="wordsSection">
+      <div id="pane-availability" class="tab-pane">
+        <h2>Availability Status</h2>
+        <p>This title is currently available in physical and digital formats.</p>
+      </div>
+      <div id="pane-price" class="tab-pane">
+        <h2>Price Comparison</h2>
+        <div class="table-responsive">
+          <table class="price-table">
+            <thead>
+              <tr>
+                <th>Store</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Link</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="pane-platforms" class="tab-pane">
+        <h2>Supported Platforms</h2>
+        <div class="platform-tags"><span class="tag">Nintendo Switch</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../web/gamePage.js"></script>
+</body>
+</html>

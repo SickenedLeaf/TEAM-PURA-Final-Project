@@ -1,0 +1,15 @@
+# Copy this file to application-local.properties in THIS folder (src/main/resources/).
+# Do not put secrets only under target/classes — that folder is rebuilt and can be deleted by mvn clean.
+#
+# Supabase: use the URI from Dashboard → Project Settings → Database (often add ?sslmode=require).
+# If you see UnknownHostException, the hostname (project ref) in the URL is wrong or outdated.
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/gamecheck
+spring.datasource.username=postgres
+spring.datasource.password=
+
+# JWT signing key (HS256) — use a long random string (at least 32 characters)
+app.jwt.secret=replace-with-a-long-random-secret-at-least-32-chars
+
+# ExchangeRate-API — required when running aggregation / forex (set in environment, not committed)
+# APP_FOREX_API_KEY=

@@ -1,0 +1,2 @@
+ALTER TABLE games
+ALTER COLUMN product_code TYPE VARCHAR(20);
