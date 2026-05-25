@@ -79,30 +79,52 @@ document.querySelectorAll('img, svg').forEach(el => {
 async function loadGameData() {
   if (!gameId) {
     console.error('No game ID provided in URL');
+    document.querySelector('.game-title').textContent = 'Game Not Found';
     return;
   }
 
-  try {
-    // Fetch game details
-    const gameResponse = await fetch(`${API_BASE_URL}/games/${gameId}`);
-    if (!gameResponse.ok) {
-      throw new Error(`Failed to fetch game: ${gameResponse.status}`);
+  // 1. INSTANT CACHE LOAD: Prevent the ugly placeholder flash
+  const savedCatalog = sessionStorage.getItem('gamecheck_catalog');
+  if (savedCatalog) {
+    const catalog = JSON.parse(savedCatalog);
+    // Find the game in the cache (using == in case of string/int mismatch)
+    const cachedGame = catalog.find(g => g.gameId == gameId || g.id == gameId);
+    if (cachedGame) {
+      populateGameDetails(cachedGame); // Injects Title & Image instantly!
     }
+  } else {
+    // If they opened the link directly (no cache), clear the "Game" text so it doesn't flash
+    document.querySelector('.game-title').textContent = 'Loading...';
+  }
+
+  // 2. Set Price Table to a loading state so it's not just empty
+  const tbody = document.getElementById('priceTableBody');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.5;">Fetching latest prices...</td></tr>';
+  }
+
+  try {
+    // 3. Fetch fresh game details (just in case the database updated in the last 5 minutes)
+    const gameResponse = await fetch(`${API_BASE_URL}/games/${gameId}`);
+    if (!gameResponse.ok) throw new Error(`Failed to fetch game: ${gameResponse.status}`);
     const gameData = await gameResponse.json();
     populateGameDetails(gameData);
 
-    // Fetch prices
+    // 4. Fetch the prices
     const pricesResponse = await fetch(`${API_BASE_URL}/games/${gameId}/prices`);
-    if (!pricesResponse.ok) {
-      throw new Error(`Failed to fetch prices: ${pricesResponse.status}`);
-    }
+    if (!pricesResponse.ok) throw new Error(`Failed to fetch prices: ${pricesResponse.status}`);
     const pricesData = await pricesResponse.json();
+    
+    // 5. Inject the real prices!
     populatePriceTable(pricesData);
     updateAvailability(pricesData);
 
   } catch (error) {
     console.error('Failed to load game data:', error);
     document.querySelector('.game-title').textContent = 'Failed to load game data';
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ff6b6b;">Error loading prices</td></tr>';
+    }
   }
 }
 

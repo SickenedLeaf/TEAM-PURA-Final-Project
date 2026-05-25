@@ -178,44 +178,51 @@
     });
 
     // ── Initial Load ───────────────────────────────────────────
-    // Fetch once on init, then filter locally
     document.addEventListener('DOMContentLoaded', async () => {
       searchInput.value = ''; // Start with empty query
+      
+      if (loadingText) loadingText.style.display = 'none';
 
-      // Show loading state
-      if (loadingText) {
-        loadingText.style.display = 'block';
+      // 1. FAST PATH: Check if we already downloaded the data this session
+      const savedCatalog = sessionStorage.getItem('gamecheck_catalog');
+      
+      if (savedCatalog) {
+        // Data exists! Skip Railway completely and load instantly.
+        cachedGames = JSON.parse(savedCatalog);
+        applyFilters(); 
+        return; // STOP HERE!
       }
-      grid.innerHTML = '';
+
+      // 2. SLOW PATH: First time loading. Draw Skeletons!
+      let skeletonHTML = '';
+      for (let i = 0; i < 10; i++) {
+        skeletonHTML += `
+          <div class="skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text" style="width: 50%;"></div>
+          </div>
+        `;
+      }
+      grid.innerHTML = skeletonHTML;
 
       try {
-        // Fetch entire game catalog once
+        // 3. Fetch from Railway Server (This only happens ONCE now)
         const response = await fetch(`${API_BASE_URL}/games/search?query=`);
         
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
 
         const data = await response.json();
         
-        // Save to cache
+        // 4. Cache the data to the browser so reloads are instant!
         cachedGames = data;
+        sessionStorage.setItem('gamecheck_catalog', JSON.stringify(data));
 
-        // Hide loading state
-        if (loadingText) {
-          loadingText.style.display = 'none';
-        }
-
-        // Render initial UI using local filtering
+        // 5. Replace Skeletons with Real Cards
         applyFilters();
 
       } catch (error) {
-        // Hide loading state on error
-        if (loadingText) {
-          loadingText.style.display = 'none';
-        }
-        
         console.error('Failed to fetch games:', error);
-        grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
+        grid.innerHTML = '<p class="no-results" style="color: white;">Failed to load games. Please try again later.</p>';
       }
     });
