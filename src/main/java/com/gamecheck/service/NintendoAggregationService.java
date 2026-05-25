@@ -264,14 +264,11 @@ public class NintendoAggregationService {
                             if (coverImageUrl.startsWith("/")) {
                                 coverImageUrl = coverImageUrl.substring(1);
                             }
-                            coverImageUrl = "https://assets.nintendo.com/image/upload/f_auto,q_auto/ncom/en_US/" + coverImageUrl;
+                            coverImageUrl = "https://assets.nintendo.com/image/upload/f_auto,q_auto/" + coverImageUrl;
                         }
                         
-                        // Extract platform
-                        String platform = hit.path("platform").asText();
-                        if (platform == null || platform.isBlank()) {
-                            platform = "Nintendo Switch";
-                        }
+                        // Extract platform with explicit Jackson node checking
+                        String platform = hit.hasNonNull("platform") ? hit.get("platform").asText() : "Nintendo Switch";
                         
                         NintendoGameDto dto = NintendoGameDto.builder()
                             .title(title)
