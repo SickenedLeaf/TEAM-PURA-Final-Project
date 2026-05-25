@@ -10,7 +10,6 @@
     const paginationEl = document.getElementById('pagination');
     const countEl      = document.getElementById('resultsCount');
     const searchInput  = document.getElementById('searchInput');
-    const filterYear   = document.getElementById('filterYear');
     const filterPlatform = document.getElementById('filterPlatform');
     const filterFormat = document.getElementById('filterFormat');
 
@@ -129,48 +128,25 @@
     // ── Apply Filters (API Call) ───────────────────────────────
     async function applyFilters() {
       const query = searchInput.value.trim();
-      const platform = filterPlatform.value;
-
-      if (!query) {
-        // For empty query, fetch all games without platform filter
-        try {
-          isLoading = true;
-          renderGames([]); // Show loading state
-
-          const response = await fetch(`${API_BASE_URL}/games/search?query=`);
-
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-          }
-
-          const data = await response.json();
-          filteredGames = data;
-
-          isLoading = false;
-          currentPage = 1;
-          renderGames(filteredGames);
-          renderPagination(filteredGames.length);
-          updateCount(filteredGames.length);
-        } catch (error) {
-          console.error('Failed to fetch games:', error);
-          isLoading = false;
-          grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
-          filteredGames = [];
-          renderPagination(0);
-          updateCount(0);
-        }
-        return;
-      }
+      const platform = filterPlatform ? filterPlatform.value : 'all';
+      const format = filterFormat ? filterFormat.value : 'all';
 
       isLoading = true;
-      renderGames(filteredGames); // Show loading state
+      renderGames([]); // Show loading state
 
       try {
         // Build API URL
         const params = new URLSearchParams();
-        params.append('query', query);
-        if (platform !== 'all') {
+        params.append('query', query || '');
+        
+        // Only add platform filter if it's not a placeholder value
+        if (platform && platform !== 'all' && platform !== 'Platform') {
           params.append('platform', platform);
+        }
+
+        // Only add format filter if it's not a placeholder value
+        if (format && format !== 'all' && format !== 'Format') {
+          params.append('format', format);
         }
 
         const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`);
@@ -200,7 +176,12 @@
 
     // ── Event Listeners ────────────────────────────────────────
     searchInput.addEventListener('input', applyFilters);
-    filterPlatform.addEventListener('change', applyFilters);
+    if (filterPlatform) {
+      filterPlatform.addEventListener('change', applyFilters);
+    }
+    if (filterFormat) {
+      filterFormat.addEventListener('change', applyFilters);
+    }
 
     // Prevent drag on all images
     document.querySelectorAll('img, svg, video').forEach(el => {
