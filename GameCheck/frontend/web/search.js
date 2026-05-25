@@ -131,17 +131,34 @@
       const query = searchInput.value.trim();
       const platform = filterPlatform.value;
 
-      // Hide year filter since backend doesn't support it
-      filterYear.style.display = 'none';
-      // Hide format filter since backend doesn't support it
-      filterFormat.style.display = 'none';
-
       if (!query) {
-        filteredGames = [];
-        currentPage = 1;
-        renderGames(filteredGames);
-        renderPagination(0);
-        updateCount(0);
+        // For empty query, fetch all games without platform filter
+        try {
+          isLoading = true;
+          renderGames([]); // Show loading state
+
+          const response = await fetch(`${API_BASE_URL}/games/search?query=`);
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          filteredGames = data;
+
+          isLoading = false;
+          currentPage = 1;
+          renderGames(filteredGames);
+          renderPagination(filteredGames.length);
+          updateCount(filteredGames.length);
+        } catch (error) {
+          console.error('Failed to fetch games:', error);
+          isLoading = false;
+          grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
+          filteredGames = [];
+          renderPagination(0);
+          updateCount(0);
+        }
         return;
       }
 
@@ -195,5 +212,8 @@
     });
 
     // ── Initial Load ───────────────────────────────────────────
-    // Don't load on page load - wait for user to type a search query
-    renderGames([]); // Show empty state initially
+    // Load default games on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      searchInput.value = ''; // Start with empty query
+      applyFilters(); // Trigger initial fetch
+    });
