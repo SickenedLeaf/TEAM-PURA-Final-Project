@@ -97,6 +97,28 @@ public class NintendoAggregationService {
                     
                     priceRepository.save(digitalListing);
                 }
+            } else {
+                // Game doesn't exist in our database - create it as a digital-exclusive game
+                Game newGame = new Game();
+                newGame.setGameTitle(nintendoGame.getTitle());
+                newGame.setPlatform("Nintendo Switch");
+                newGame.setCoverImageUrl(nintendoGame.getCoverImageUrl());
+                
+                Game savedGame = gameRepository.save(newGame);
+                
+                // Create price listing for the new game
+                Price digitalListing = new Price();
+                digitalListing.setGame(savedGame);
+                digitalListing.setSource(nintendoSource);
+                digitalListing.setPricePhp(convertUsdToPhp(nintendoGame.getPrice()));
+                digitalListing.setPriceOriginal(nintendoGame.getPrice());
+                digitalListing.setCurrencyCode("USD");
+                digitalListing.setListingUrl(nintendoGame.getUrl());
+                digitalListing.setLastUpdated(LocalDateTime.now());
+                
+                priceRepository.save(digitalListing);
+                
+                logger.info("Created new digital-exclusive game: {}", nintendoGame.getTitle());
             }
         }
     }
@@ -221,10 +243,17 @@ public class NintendoAggregationService {
                         url = "https://www.nintendo.com/store/games/";
                     }
                     
+                    // Extract cover image URL
+                    String coverImageUrl = hit.path("boxart").asText();
+                    if (coverImageUrl == null || coverImageUrl.isBlank()) {
+                        coverImageUrl = hit.path("image_url").asText();
+                    }
+                    
                     NintendoGameDto dto = NintendoGameDto.builder()
                         .title(title)
                         .price(price)
                         .url(url)
+                        .coverImageUrl(coverImageUrl)
                         .build();
                     
                     games.add(dto);
