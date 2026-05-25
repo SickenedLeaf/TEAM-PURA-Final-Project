@@ -1,6 +1,6 @@
 // ── Config ─────────────────────────────────────────────────
     const GAMES_PER_PAGE = 10; // 5 columns × 2 rows
-    const API_BASE_URL = 'http://localhost:8080/api';
+    const API_BASE_URL = 'https://team-pura-final-project-production.up.railway.app/api';
     let currentPage = 1;
     let filteredGames = [];
     let isLoading = false;
