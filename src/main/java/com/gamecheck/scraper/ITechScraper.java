@@ -23,9 +23,10 @@ public class ITechScraper extends GenericScraper {
         String mainSitemapUrl = "https://www.itech.ph/sitemap.xml";
 
         try {
-            // Attempt to fetch the product sitemap
+            // Attempt to fetch the product sitemap with browser spoofing headers
             org.jsoup.Jsoup.connect(productSitemapUrl)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
                 .timeout(10000)
                 .get();
             System.out.println("[iTech] Using product-sitemap.xml directly");

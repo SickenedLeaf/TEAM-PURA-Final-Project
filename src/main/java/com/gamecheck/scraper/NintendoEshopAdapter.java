@@ -15,8 +15,10 @@ import org.springframework.web.client.RestTemplate;
  *
  * NOTE: After fixing currency code and listing URLs, existing eShop price records in the DB
  * have wrong values and need to be cleared and re-aggregated.
+ *
+ * DISABLED: Replaced by NintendoAggregationService which uses the US Algolia API.
  */
-@Component
+// @Component
 public class NintendoEshopAdapter implements SourceAdapter {
 
     private static final String ESHOP_API_URL = "https://searching.nintendo-europe.com/en/select?q=*&fq=type:GAME+AND+system_type:nintendoswitch*+AND+price_sorting_f:[1+TO+99999]+AND+date_from:[*+TO+NOW]&rows=50&start=0";

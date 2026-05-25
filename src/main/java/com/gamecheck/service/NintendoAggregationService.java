@@ -227,13 +227,18 @@ public class NintendoAggregationService {
                             continue;
                         }
                         
-                        // Extract price (price_range_regular or price_range_low)
-                        String priceStr = hit.path("price_range_regular").asText();
-                        if (priceStr == null || priceStr.isBlank()) {
-                            priceStr = hit.path("price_range_low").asText();
+                        // Extract price (price.finalPrice or eshopDetails.regularPrice)
+                        JsonNode priceNode = hit.path("price").path("finalPrice");
+                        if (priceNode == null || priceNode.isMissingNode()) {
+                            priceNode = hit.path("eshopDetails").path("regularPrice");
                         }
                         
-                        BigDecimal price = parsePrice(priceStr);
+                        BigDecimal price = null;
+                        if (priceNode != null && !priceNode.isMissingNode()) {
+                            String priceStr = priceNode.asText();
+                            price = parsePrice(priceStr);
+                        }
+                        
                         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
                             continue;
                         }
@@ -244,8 +249,11 @@ public class NintendoAggregationService {
                             url = "https://www.nintendo.com/store/games/";
                         }
                         
-                        // Extract cover image URL
-                        String coverImageUrl = hit.path("boxart").asText();
+                        // Extract cover image URL (productImage or boxart)
+                        String coverImageUrl = hit.path("productImage").asText();
+                        if (coverImageUrl == null || coverImageUrl.isBlank()) {
+                            coverImageUrl = hit.path("boxart").asText();
+                        }
                         if (coverImageUrl == null || coverImageUrl.isBlank()) {
                             coverImageUrl = hit.path("image_url").asText();
                         }
