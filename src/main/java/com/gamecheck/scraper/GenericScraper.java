@@ -25,14 +25,15 @@ public abstract class GenericScraper {
     protected final String storeName;
     protected final String sitemapIndexURL;
     
-    private static final int BASE_DELAY_MS = 1500;
+    private static final int MIN_DELAY_MS = 2000;
+    private static final int MAX_DELAY_MS = 4000;
     private static final Random RANDOM = new Random();
     private static final List<String> USER_AGENTS = Arrays.asList(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3.1 Safari/605.1.15",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     );
 
     // ==========================================
@@ -79,6 +80,12 @@ public abstract class GenericScraper {
 
         List<String> activeSubSitemaps = discoverSubSitemaps();
         List<String> targetedUrls = extractAndFilterUrls(activeSubSitemaps);
+
+        System.out.println("[" + storeName + "] Found " + targetedUrls.size() + " URLs after filtering");
+        int sampleCount = Math.min(3, targetedUrls.size());
+        for (int i = 0; i < sampleCount; i++) {
+            System.out.println("[" + storeName + "] Sample URL " + (i + 1) + ": " + targetedUrls.get(i));
+        }
 
         int processed = 0;
         for (String url : targetedUrls) {
@@ -264,6 +271,7 @@ public abstract class GenericScraper {
     protected List<String> discoverSubSitemaps() {
         List<String> discoveredMaps = new ArrayList<>();
         try {
+            System.out.println("[DataBlitz] Fetching sitemap from: " + sitemapIndexURL);
             Document masterDoc = openBrowserLikeConnection(sitemapIndexURL).get();
             Elements sitemapElements = masterDoc.select("sitemap loc");
             
@@ -328,8 +336,8 @@ public abstract class GenericScraper {
 
     private void applyPoliteThrottle() {
         try {
-            long jitter = (long) (Math.random() * 500); 
-            Thread.sleep(BASE_DELAY_MS + jitter);
+            long delay = MIN_DELAY_MS + (long) (Math.random() * (MAX_DELAY_MS - MIN_DELAY_MS));
+            Thread.sleep(delay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

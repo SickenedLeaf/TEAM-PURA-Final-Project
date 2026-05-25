@@ -25,10 +25,17 @@ public class DataBlitzAdapter implements SourceAdapter {
 
     @Override
     public List<PriceRecord> fetchPrices() {
-        DatablitzScraper scraper = new DatablitzScraper();
-        return scraper.syncStore(urlCap).stream()
-            .map(productMapper::map)
-            .flatMap(Optional::stream)
-            .collect(Collectors.toList());
+        System.out.println("[DataBlitz] Starting scrape...");
+        try {
+            DatablitzScraper scraper = new DatablitzScraper();
+            return scraper.syncStore(urlCap).stream()
+                .map(productMapper::map)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("[DataBlitz] Fatal error: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
     }
 }

@@ -98,6 +98,7 @@ async function loadGameData() {
     }
     const pricesData = await pricesResponse.json();
     populatePriceTable(pricesData);
+    updateAvailability(pricesData);
 
   } catch (error) {
     console.error('Failed to load game data:', error);
@@ -123,6 +124,30 @@ function populateGameDetails(game) {
   const platformsEl = document.querySelector('.platform-tags');
   if (platformsEl && game.platform) {
     platformsEl.innerHTML = `<span class="tag">${game.platform}</span>`;
+  }
+}
+
+// ── Update Availability Text ────────────────────────────────────
+function updateAvailability(prices) {
+  const availabilityText = document.getElementById('availabilityText');
+  if (!availabilityText) return;
+
+  if (!prices || prices.length === 0) {
+    availabilityText.textContent = 'No availability information found for this title.';
+    return;
+  }
+
+  const hasPhysical = prices.some(p => p.sourceType === 'physical');
+  const hasDigital = prices.some(p => p.sourceType === 'digital');
+
+  if (hasPhysical && hasDigital) {
+    availabilityText.textContent = 'Available in physical and digital formats.';
+  } else if (hasPhysical) {
+    availabilityText.textContent = 'Available at physical stores.';
+  } else if (hasDigital) {
+    availabilityText.textContent = 'Available digitally.';
+  } else {
+    availabilityText.textContent = 'No availability information found for this title.';
   }
 }
 
