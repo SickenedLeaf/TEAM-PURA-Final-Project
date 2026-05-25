@@ -3,10 +3,7 @@
     const API_BASE_URL = 'https://team-pura-final-project-production.up.railway.app/api';
     let currentPage = 1;
     let filteredGames = [];
-    let cachedGames = []; // Cache for fetched games to avoid redundant API calls
-    let isLoading = false;
-    let abortController = null; // For cancelling pending requests
-    let debounceTimer = null; // For debouncing input events
+    let cachedGames = []; // Cache for fetched games - fetch once, filter locally
 
     // ── DOM ────────────────────────────────────────────────────
     const grid         = document.getElementById('resultsGrid');
@@ -149,88 +146,16 @@
       });
     }
 
-    // ── Fetch Games from API ─────────────────────────────────────
-    // Fetches games from API and updates cache
-    async function fetchGames(query) {
-      // Cancel any pending request
-      if (abortController) {
-        abortController.abort();
-      }
-      abortController = new AbortController();
-
-      // Show loading indicator
-      if (loadingText) {
-        loadingText.style.display = 'block';
-      }
-      grid.innerHTML = '';
-
-      try {
-        // Build API URL - send query to backend
-        const params = new URLSearchParams();
-        params.append('query', query || '');
-        
-        const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`, {
-          signal: abortController.signal
-        });
-
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Update cache
-        cachedGames = data;
-
-        // Hide loading indicator
-        if (loadingText) {
-          loadingText.style.display = 'none';
-        }
-
-        return data;
-
-      } catch (error) {
-        // Hide loading indicator on error
-        if (loadingText) {
-          loadingText.style.display = 'none';
-        }
-
-        // Ignore aborted requests
-        if (error.name === 'AbortError') {
-          return null;
-        }
-        
-        console.error('Failed to fetch games:', error);
-        grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
-        return null;
-      }
-    }
-
-    // ── Apply Filters (Uses Cache or Fetches) ────────────────────
-    // Main filter function - uses cache if available, fetches if needed
-    async function applyFilters(shouldFetch = false) {
+    // ── Apply Filters (100% Local Filtering) ─────────────────────
+    // Filters cachedGames locally - never makes network requests
+    function applyFilters() {
       // Read all inputs simultaneously - single source of truth
       const query = searchInput.value.trim();
       const platform = filterPlatform ? filterPlatform.value : 'all';
       const format = filterFormat ? filterFormat.value : 'all';
 
-      let gamesToFilter;
-
-      if (shouldFetch || cachedGames.length === 0) {
-        // Fetch from API (initial load or search input changed)
-        const fetchedData = await fetchGames(query);
-        if (fetchedData === null) {
-          // Request was aborted or failed
-          return;
-        }
-        gamesToFilter = fetchedData;
-      } else {
-        // Use cached data (dropdown change only)
-        gamesToFilter = cachedGames;
-      }
-
-      // Apply unified filter pipeline
-      filteredGames = filterGames(gamesToFilter, query, platform, format);
+      // Apply unified filter pipeline to cached games
+      filteredGames = filterGames(cachedGames, query, platform, format);
 
       // Render results
       currentPage = 1;
@@ -240,18 +165,13 @@
     }
 
     // ── Event Listeners ────────────────────────────────────────
-    // Debounced input listener for search bar - triggers API fetch
-    searchInput.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => applyFilters(true), 300); // 300ms debounce, fetch from API
-    });
-    
-    // Dropdown change listeners - use cached data (no API call)
+    // All events trigger instant local filtering (no debounce needed)
+    searchInput.addEventListener('input', applyFilters);
     if (filterPlatform) {
-      filterPlatform.addEventListener('change', () => applyFilters(false));
+      filterPlatform.addEventListener('change', applyFilters);
     }
     if (filterFormat) {
-      filterFormat.addEventListener('change', () => applyFilters(false));
+      filterFormat.addEventListener('change', applyFilters);
     }
 
     // Prevent drag on all images
@@ -264,8 +184,44 @@
     });
 
     // ── Initial Load ───────────────────────────────────────────
-    // Load default games on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    // Fetch once on init, then filter locally
+    document.addEventListener('DOMContentLoaded', async () => {
       searchInput.value = ''; // Start with empty query
-      applyFilters(true); // Trigger initial fetch from API
+
+      // Show loading state
+      if (loadingText) {
+        loadingText.style.display = 'block';
+      }
+      grid.innerHTML = '';
+
+      try {
+        // Fetch entire game catalog once
+        const response = await fetch(`${API_BASE_URL}/games/search?query=`);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Save to cache
+        cachedGames = data;
+
+        // Hide loading state
+        if (loadingText) {
+          loadingText.style.display = 'none';
+        }
+
+        // Render initial UI using local filtering
+        applyFilters();
+
+      } catch (error) {
+        // Hide loading state on error
+        if (loadingText) {
+          loadingText.style.display = 'none';
+        }
+        
+        console.error('Failed to fetch games:', error);
+        grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
+      }
     });
