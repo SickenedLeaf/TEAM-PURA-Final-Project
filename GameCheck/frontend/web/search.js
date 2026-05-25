@@ -125,7 +125,7 @@
         : '';
     }
 
-    // ── Apply Filters (API Call) ───────────────────────────────
+    // ── Apply Filters (API Call + Client-side Filtering) ─────────
     async function applyFilters() {
       const query = searchInput.value.trim();
       const platform = filterPlatform ? filterPlatform.value : 'all';
@@ -135,19 +135,9 @@
       renderGames([]); // Show loading state
 
       try {
-        // Build API URL
+        // Build API URL - only send query, do client-side filtering for platform/format
         const params = new URLSearchParams();
         params.append('query', query || '');
-        
-        // Only add platform filter if it's not a placeholder value
-        if (platform && platform !== 'all' && platform !== 'Platform') {
-          params.append('platform', platform);
-        }
-
-        // Only add format filter if it's not a placeholder value
-        if (format && format !== 'all' && format !== 'Format') {
-          params.append('format', format);
-        }
 
         const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`);
 
@@ -156,7 +146,29 @@
         }
 
         const data = await response.json();
-        filteredGames = data; // Backend returns array of GameSummaryDto
+
+        // Apply client-side filtering with flexible string matching
+        filteredGames = data.filter(game => {
+          // Platform filter - case-insensitive inclusion check
+          if (platform && platform !== 'all' && platform !== 'Platform') {
+            const gamePlatform = (game.platform || '').toLowerCase();
+            const selectedPlatform = platform.toLowerCase();
+            if (!gamePlatform.includes(selectedPlatform)) {
+              return false;
+            }
+          }
+
+          // Format filter - case-insensitive inclusion check
+          if (format && format !== 'all' && format !== 'Format') {
+            const gameFormat = (game.format || '').toLowerCase();
+            const selectedFormat = format.toLowerCase();
+            if (!gameFormat.includes(selectedFormat)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
 
         isLoading = false; // Clear loading state before rendering
         currentPage = 1;
