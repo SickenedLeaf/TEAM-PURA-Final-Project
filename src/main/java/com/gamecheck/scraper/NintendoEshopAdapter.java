@@ -11,7 +11,10 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Adapter for Nintendo eShop API (Europe region).
  * Fetches Nintendo Switch game prices from the Nintendo Europe search API.
- * Prices are in PHP (PH region) and do not require currency conversion.
+ * Prices are in USD and require currency conversion to PHP via AggregationPriceConverter.
+ *
+ * NOTE: After fixing currency code and listing URLs, existing eShop price records in the DB
+ * have wrong values and need to be cleared and re-aggregated.
  */
 @Component
 public class NintendoEshopAdapter implements SourceAdapter {
@@ -80,15 +83,21 @@ public class NintendoEshopAdapter implements SourceAdapter {
                 }
                 String productCode = truncateOrHash(titleMaster);
 
-                // Build listing URL using title_master
-                String url = "https://www.nintendo.com/store/games/?q=" + titleMaster.toLowerCase().replace(" ", "+");
+                // Build listing URL using url_key_s if available, otherwise fallback to store games page
+                String urlKey = game.path("url_key_s").asText();
+                String url;
+                if (!urlKey.isBlank()) {
+                    url = "https://www.nintendo.com/store/products/" + urlKey + "/";
+                } else {
+                    url = "https://www.nintendo.com/store/games/";
+                }
 
                 PriceRecord record = PriceRecord.builder()
                     .productCode(productCode)
                     .gameTitle(title)
                     .platform("Nintendo Switch")
                     .priceOriginal(priceOriginal)
-                    .currencyCode("PHP")
+                    .currencyCode("USD")
                     .listingUrl(url)
                     .sourceName(getSourceName())
                     .imageUrl(imageUrl)

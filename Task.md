@@ -180,20 +180,20 @@
 ## Milestone 8 — Deployment
 *Goal: Backend is live and accessible from the internet.*
 
-- [ ] Create a Railway or Render account
-- [ ] Connect GitHub repository to Railway/Render
-- [ ] Set environment variables on the deployment platform:
+- [x] Create a Railway or Render account
+- [x] Connect GitHub repository to Railway/Render
+- [x] Set environment variables on the deployment platform:
   - `DB_URL` (Supabase connection string)
   - `DB_USERNAME`
   - `DB_PASSWORD`
   - `JWT_SECRET`
   - `FOREX_API_KEY`
   - Any other API keys
-- [ ] Configure `application-prod.properties` to read from environment variables
-- [ ] Confirm Flyway runs migrations on first deploy
-- [ ] Confirm all endpoints respond correctly on the live URL
-- [ ] Share the live API base URL with your frontend teammate
-- [ ] Test CORS — confirm frontend origin is allowed
+- [x] Configure `application-prod.properties` to read from environment variables
+- [x] Confirm Flyway runs migrations on first deploy
+- [x] Confirm all endpoints respond correctly on the live URL
+- [x] Share the live API base URL with your frontend teammate
+- [x] Test CORS — confirm frontend origin is allowed
 
 ---
 
