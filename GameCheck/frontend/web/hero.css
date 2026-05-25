@@ -6,12 +6,12 @@
 }
 @font-face {
   font-family: 'FuturaPt-Demi';
-  src: url('/fonts/FuturaPtDemi.ttf') format('truetype');
+  src: url('/fonts/FuturaPTDemi.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'FuturaPt-Bold';
-  src: url('/fonts/FuturaPtBold.ttf') format('truetype');
+  src: url('/fonts/FuturaPTBold.ttf') format('truetype');
   font-display: swap;
 }
 
