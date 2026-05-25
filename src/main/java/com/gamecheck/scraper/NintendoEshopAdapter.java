@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -48,22 +47,6 @@ public class NintendoEshopAdapter implements SourceAdapter {
             JsonNode root = objectMapper.readTree(jsonResponse);
             JsonNode games = root.path("response").path("docs");
 
-            // Temporary debug: log the field names (keys) of the first game object
-            if (games.isArray() && games.size() > 0) {
-                JsonNode first = games.get(0);
-                StringBuilder keys = new StringBuilder();
-                keys.append("[Nintendo eShop][DEBUG] First game fields: ");
-                Iterator<String> fieldIt = first.fieldNames();
-                boolean firstField = true;
-                while (fieldIt.hasNext()) {
-                    if (!firstField) {
-                        keys.append(", ");
-                    }
-                    keys.append(fieldIt.next());
-                    firstField = false;
-                }
-                System.out.println(keys.toString());
-            }
 
             for (JsonNode game : games) {
                 // Extract game title (prefer title_extras_txt, fallback to title)
@@ -101,11 +84,11 @@ public class NintendoEshopAdapter implements SourceAdapter {
                 }
                 String productCode = truncateOrHash(titleMaster);
 
-                // Build listing URL using url_key_s if available, otherwise fallback to store games page
-                String urlKey = game.path("url_key_s").asText();
+                // Build listing URL using url field if available, otherwise fallback to store games page
+                String urlField = game.path("url").asText();
                 String url;
-                if (!urlKey.isBlank()) {
-                    url = "https://www.nintendo.com/store/products/" + urlKey + "/";
+                if (!urlField.isBlank()) {
+                    url = "https://www.nintendo.com" + urlField;
                 } else {
                     url = "https://www.nintendo.com/store/games/";
                 }
