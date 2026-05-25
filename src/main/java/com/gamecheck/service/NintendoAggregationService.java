@@ -52,11 +52,7 @@ public class NintendoAggregationService {
         this.gameRepository = gameRepository;
         this.priceRepository = priceRepository;
         this.sourceRepository = sourceRepository;
-        
-        // Configure RestTemplate with UTF-8 encoding
         this.restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().add(0, new org.springframework.http.converter.StringHttpMessageConverter(java.nio.charset.StandardCharsets.UTF_8));
-        
         this.objectMapper = new ObjectMapper();
     }
 
@@ -264,7 +260,11 @@ public class NintendoAggregationService {
                             coverImageUrl = hit.path("image_url").asText();
                         }
                         if (coverImageUrl != null && !coverImageUrl.isBlank() && !coverImageUrl.startsWith("http")) {
-                            coverImageUrl = "https://assets.nintendo.com/image/upload/ncom/en_US/" + coverImageUrl;
+                            // Remove leading slash to avoid double-slashes
+                            if (coverImageUrl.startsWith("/")) {
+                                coverImageUrl = coverImageUrl.substring(1);
+                            }
+                            coverImageUrl = "https://assets.nintendo.com/image/upload/f_auto,q_auto/ncom/en_US/" + coverImageUrl;
                         }
                         
                         NintendoGameDto dto = NintendoGameDto.builder()
