@@ -37,18 +37,12 @@
           window.location.href = `gamePage.html?id=${game.gameId}`;
         });
 
-        // Format price as ₱X,XXX.XX
-        const formattedPrice = game.bestPricePhp
-          ? `₱${parseFloat(game.bestPricePhp).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-          : 'Price not available';
-
         // Use cover image or placeholder
         const coverImage = game.coverImageUrl || '../svg/gamePic.svg';
 
         card.innerHTML = `
           <div class="game-card-img" style="background-image: url('${coverImage}'); background-size: cover; background-position: center;"></div>
           <div class="game-card-title">${game.title}</div>
-          <div class="game-card-price">${formattedPrice}</div>
           <div class="game-card-meta">${game.platform}</div>
         `;
         grid.appendChild(card);
