@@ -32,9 +32,9 @@ public class NintendoAggregationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NintendoAggregationService.class);
     private static final double FALLBACK_USD_TO_PHP_RATE = 56.0;
-    private static final String NINTENDO_US_ALGOLIA_APP_ID = "U3B6MG4I2R";
-    private static final String NINTENDO_US_ALGOLIA_API_KEY = "9fa3d63fbd3d277a9ec5536159da3248";
-    private static final String NINTENDO_US_ALGOLIA_INDEX = "ncom_game_us_en_title";
+    private static final String NINTENDO_US_ALGOLIA_APP_ID = "U3B6GR4UA3";
+    private static final String NINTENDO_US_ALGOLIA_API_KEY = "a29c6927638bfd8cee23993e51e721c9";
+    private static final String NINTENDO_US_ALGOLIA_URL = "https://" + NINTENDO_US_ALGOLIA_APP_ID + "-dsn.algolia.net/1/indexes/*/queries";
     private static final String FOREX_API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
     private static final long CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
@@ -199,64 +199,66 @@ public class NintendoAggregationService {
         List<NintendoGameDto> games = new ArrayList<>();
         
         try {
-            // Build Algolia query
-            String algoliaUrl = "https://" + NINTENDO_US_ALGOLIA_APP_ID + "-dsn.algolia.net/1/indexes/" + NINTENDO_US_ALGOLIA_INDEX + "/query";
+            // Build request body with correct Algolia payload structure
+            String requestBody = "{\"requests\":[{\"indexName\":\"store_game_en_us\",\"params\":\"query=&hitsPerPage=40\"}]}";
             
-            // Create request body
-            String requestBody = "{\"params\":\"hitsPerPage=100&facetFilters=[\\\"platform:Nintendo Switch\\\"]\"}";
-            
-            // Set headers
+            // Set headers with correct Algolia header names
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
-            headers.set("X-Algolia-API-Key", NINTENDO_US_ALGOLIA_API_KEY);
-            headers.set("X-Algolia-Application-Id", NINTENDO_US_ALGOLIA_APP_ID);
+            headers.set("x-algolia-application-id", NINTENDO_US_ALGOLIA_APP_ID);
+            headers.set("x-algolia-api-key", NINTENDO_US_ALGOLIA_API_KEY);
             
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             
-            // Make POST request
-            ResponseEntity<String> response = restTemplate.exchange(algoliaUrl, HttpMethod.POST, entity, String.class);
+            // Make POST request to correct URL
+            ResponseEntity<String> response = restTemplate.exchange(NINTENDO_US_ALGOLIA_URL, HttpMethod.POST, entity, String.class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode root = objectMapper.readTree(response.getBody());
-                JsonNode hits = root.path("hits");
+                JsonNode results = root.path("results");
                 
-                for (JsonNode hit : hits) {
-                    String title = hit.path("title").asText();
-                    if (title == null || title.isBlank()) {
-                        continue;
+                if (results.isArray() && results.size() > 0) {
+                    JsonNode firstResult = results.get(0);
+                    JsonNode hits = firstResult.path("hits");
+                    
+                    for (JsonNode hit : hits) {
+                        String title = hit.path("title").asText();
+                        if (title == null || title.isBlank()) {
+                            continue;
+                        }
+                        
+                        // Extract price (price_range_regular or price_range_low)
+                        String priceStr = hit.path("price_range_regular").asText();
+                        if (priceStr == null || priceStr.isBlank()) {
+                            priceStr = hit.path("price_range_low").asText();
+                        }
+                        
+                        BigDecimal price = parsePrice(priceStr);
+                        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+                            continue;
+                        }
+                        
+                        // Extract URL
+                        String url = hit.path("url").asText();
+                        if (url == null || url.isBlank()) {
+                            url = "https://www.nintendo.com/store/games/";
+                        }
+                        
+                        // Extract cover image URL
+                        String coverImageUrl = hit.path("boxart").asText();
+                        if (coverImageUrl == null || coverImageUrl.isBlank()) {
+                            coverImageUrl = hit.path("image_url").asText();
+                        }
+                        
+                        NintendoGameDto dto = NintendoGameDto.builder()
+                            .title(title)
+                            .price(price)
+                            .url(url)
+                            .coverImageUrl(coverImageUrl)
+                            .build();
+                        
+                        games.add(dto);
                     }
-                    
-                    // Extract price (price_range_regular or price_range_low)
-                    String priceStr = hit.path("price_range_regular").asText();
-                    if (priceStr == null || priceStr.isBlank()) {
-                        priceStr = hit.path("price_range_low").asText();
-                    }
-                    
-                    BigDecimal price = parsePrice(priceStr);
-                    if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-                        continue;
-                    }
-                    
-                    // Extract URL
-                    String url = hit.path("url").asText();
-                    if (url == null || url.isBlank()) {
-                        url = "https://www.nintendo.com/store/games/";
-                    }
-                    
-                    // Extract cover image URL
-                    String coverImageUrl = hit.path("boxart").asText();
-                    if (coverImageUrl == null || coverImageUrl.isBlank()) {
-                        coverImageUrl = hit.path("image_url").asText();
-                    }
-                    
-                    NintendoGameDto dto = NintendoGameDto.builder()
-                        .title(title)
-                        .price(price)
-                        .url(url)
-                        .coverImageUrl(coverImageUrl)
-                        .build();
-                    
-                    games.add(dto);
                 }
                 
                 logger.info("Successfully fetched {} games from Nintendo eShop API", games.size());
