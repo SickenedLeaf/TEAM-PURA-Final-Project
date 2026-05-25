@@ -155,14 +155,14 @@
         // Format data is only available via the separate /api/games/{id}/prices endpoint.
         // The Format dropdown in the UI is currently non-functional for search results.
 
-        // Apply client-side platform filtering with flexible string matching
-        // (in case backend doesn't handle partial matches like "Switch" matching "Nintendo Switch")
+        // Apply client-side platform filtering with exact match
+        // HTML values now match backend database strings exactly
         filteredGames = data.filter(game => {
-          // Platform filter - case-insensitive inclusion check
+          // Platform filter - case-insensitive equality check
           if (platform && platform !== 'all' && platform !== 'Platform') {
             const gamePlatform = (game.platform || '').toLowerCase();
             const selectedPlatform = platform.toLowerCase();
-            if (!gamePlatform.includes(selectedPlatform)) {
+            if (gamePlatform !== selectedPlatform) {
               return false;
             }
           }
