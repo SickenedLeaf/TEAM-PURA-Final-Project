@@ -52,7 +52,7 @@
 
         card.innerHTML = `
           <div class="game-card-img" style="background-image: url('${coverImage}'); background-size: cover; background-position: center;"></div>
-          <div class="game-card-title">${game.gameTitle}</div>
+          <div class="game-card-title">${game.title}</div>
           <div class="game-card-price">${formattedPrice}</div>
           <div class="game-card-meta">${game.platform}</div>
         `;
