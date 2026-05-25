@@ -1,15 +1,18 @@
 /* ===== FONTS ===== */
 @font-face {
   font-family: 'CyberformDemo-Regular';
-  src: url('/fonts/CyberformDemo.otf') format('truetype');
+  src: url('../fonts/CyberformDemo.otf') format('truetype');
+  font-display: swap;
 }
 @font-face {
   font-family: 'FuturaPt-Demi';
-  src: url('/fonts/FuturaPtDemi.ttf') format('truetype');
+  src: url('../fonts/FuturaPtDemi.ttf') format('truetype');
+  font-display: swap;
 }
 @font-face {
   font-family: 'FuturaPt-Bold';
-  src: url('/fonts/FuturaPtBold.ttf') format('truetype');
+  src: url('../fonts/FuturaPtBold.ttf') format('truetype');
+  font-display: swap;
 }
 
 /* ===== RESET ===== */
