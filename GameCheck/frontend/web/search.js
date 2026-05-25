@@ -4,6 +4,8 @@
     let currentPage = 1;
     let filteredGames = [];
     let isLoading = false;
+    let abortController = null; // For cancelling pending requests
+    let debounceTimer = null; // For debouncing input events
 
     // ── DOM ────────────────────────────────────────────────────
     const grid         = document.getElementById('resultsGrid');
@@ -125,8 +127,40 @@
         : '';
     }
 
-    // ── Apply Filters (API Call + Client-side Filtering) ─────────
+    // ── Unified Filter Pipeline ───────────────────────────────────
+    // Single source of truth for all filtering logic
+    function filterGames(games, query, platform, format) {
+      const queryLower = query.toLowerCase();
+      
+      return games.filter(game => {
+        // Text matching: if query is empty, allow all games to pass
+        const matchesText = queryLower === '' 
+          ? true 
+          : (game.title || '').toLowerCase().includes(queryLower);
+        
+        // Platform filter: bypass placeholder values
+        const matchesPlatform = (platform === 'Platform' || platform === '' || platform === 'all')
+          ? true
+          : game.platform.toLowerCase() === platform.toLowerCase();
+        
+        // Format filter: bypass placeholder values, check if game has the format
+        const matchesFormat = (format === 'Format' || format === '' || format === 'all')
+          ? true
+          : game.availableFormats && game.availableFormats.some(f => f.toLowerCase() === format.toLowerCase());
+        
+        return matchesText && matchesPlatform && matchesFormat;
+      });
+    }
+
+    // ── Apply Filters (API Call + Unified Filter Pipeline) ────────
     async function applyFilters() {
+      // Cancel any pending request
+      if (abortController) {
+        abortController.abort();
+      }
+      abortController = new AbortController();
+
+      // Read all inputs simultaneously - single source of truth
       const query = searchInput.value.trim();
       const platform = filterPlatform ? filterPlatform.value : 'all';
       const format = filterFormat ? filterFormat.value : 'all';
@@ -135,7 +169,7 @@
       renderGames([]); // Show loading state
 
       try {
-        // Build API URL - send query and platform to backend
+        // Build API URL - send query to backend (backend returns all games when query is empty)
         const params = new URLSearchParams();
         params.append('query', query || '');
         
@@ -144,7 +178,9 @@
           params.append('platform', platform);
         }
 
-        const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`, {
+          signal: abortController.signal
+        });
 
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -152,24 +188,8 @@
 
         const data = await response.json();
 
-        // Apply client-side platform and format filtering with explicit placeholder bypass
-        filteredGames = data.filter(game => {
-          const platformValue = platform;
-          const formatValue = format;
-          
-          // Explicitly bypass placeholder values for platform
-          const matchesPlatform = (platformValue === 'Platform' || platformValue === '' || platformValue === 'all')
-            ? true
-            : game.platform.toLowerCase() === platformValue.toLowerCase();
-
-          // Explicitly bypass placeholder values for format
-          // Check if the game has the selected format in its available formats
-          const matchesFormat = (formatValue === 'Format' || formatValue === '' || formatValue === 'all')
-            ? true
-            : game.availableFormats && game.availableFormats.some(f => f.toLowerCase() === formatValue.toLowerCase());
-
-          return matchesPlatform && matchesFormat;
-        });
+        // Pass all data through unified filter pipeline with current input values
+        filteredGames = filterGames(data, query, platform, format);
 
         isLoading = false; // Clear loading state before rendering
         currentPage = 1;
@@ -178,6 +198,11 @@
         updateCount(filteredGames.length);
 
       } catch (error) {
+        // Ignore aborted requests (user typed again before request completed)
+        if (error.name === 'AbortError') {
+          return;
+        }
+        
         console.error('Failed to fetch games:', error);
         isLoading = false; // Clear loading state on error
         grid.innerHTML = '<p class="error">Failed to load games. Please try again later.</p>';
@@ -188,7 +213,13 @@
     }
 
     // ── Event Listeners ────────────────────────────────────────
-    searchInput.addEventListener('input', applyFilters);
+    // Debounced input listener for search bar to prevent excessive API calls
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(applyFilters, 300); // 300ms debounce
+    });
+    
+    // Dropdown change listeners trigger immediately (no debounce needed)
     if (filterPlatform) {
       filterPlatform.addEventListener('change', applyFilters);
     }
