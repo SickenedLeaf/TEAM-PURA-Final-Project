@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,9 +24,16 @@ public abstract class GenericScraper {
     // ==========================================
     protected final String storeName;
     protected final String sitemapIndexURL;
-    protected final String userAgent;
     
     private static final int BASE_DELAY_MS = 1500;
+    private static final Random RANDOM = new Random();
+    private static final List<String> USER_AGENTS = Arrays.asList(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    );
 
     // ==========================================
     // CONSTRUCTOR
@@ -32,12 +41,12 @@ public abstract class GenericScraper {
     public GenericScraper(String storeName, String sitemapIndexURL) {
         this.storeName = storeName;
         this.sitemapIndexURL = sitemapIndexURL;
-        this.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     }
 
     protected Connection openBrowserLikeConnection(String url) throws IOException {
+        String randomUserAgent = USER_AGENTS.get(RANDOM.nextInt(USER_AGENTS.size()));
         return Jsoup.connect(url)
-            .userAgent(this.userAgent)
+            .userAgent(randomUserAgent)
             .header("Accept-Language", "en-US,en;q=0.9")
             .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
             .header("sec-ch-ua", "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\"")
