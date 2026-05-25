@@ -11,7 +11,6 @@
     const countEl      = document.getElementById('resultsCount');
     const searchInput  = document.getElementById('searchInput');
     const filterPlatform = document.getElementById('filterPlatform');
-    const filterFormat = document.getElementById('filterFormat');
 
     // ── Render Cards ───────────────────────────────────────────
     function renderGames(games) {
@@ -129,15 +128,19 @@
     async function applyFilters() {
       const query = searchInput.value.trim();
       const platform = filterPlatform ? filterPlatform.value : 'all';
-      const format = filterFormat ? filterFormat.value : 'all';
 
       isLoading = true;
       renderGames([]); // Show loading state
 
       try {
-        // Build API URL - only send query, do client-side filtering for platform/format
+        // Build API URL - send query and platform to backend
         const params = new URLSearchParams();
         params.append('query', query || '');
+        
+        // Only add platform filter if it's not a placeholder value
+        if (platform && platform !== 'all' && platform !== 'Platform') {
+          params.append('platform', platform);
+        }
 
         const response = await fetch(`${API_BASE_URL}/games/search?${params.toString()}`);
 
@@ -147,22 +150,19 @@
 
         const data = await response.json();
 
-        // Apply client-side filtering with flexible string matching
+        // NOTE: Format filter is disabled because the search API (/api/games/search)
+        // does not return format/sourceType information in GameSummaryDto.
+        // Format data is only available via the separate /api/games/{id}/prices endpoint.
+        // The Format dropdown in the UI is currently non-functional for search results.
+
+        // Apply client-side platform filtering with flexible string matching
+        // (in case backend doesn't handle partial matches like "Switch" matching "Nintendo Switch")
         filteredGames = data.filter(game => {
           // Platform filter - case-insensitive inclusion check
           if (platform && platform !== 'all' && platform !== 'Platform') {
             const gamePlatform = (game.platform || '').toLowerCase();
             const selectedPlatform = platform.toLowerCase();
             if (!gamePlatform.includes(selectedPlatform)) {
-              return false;
-            }
-          }
-
-          // Format filter - case-insensitive inclusion check
-          if (format && format !== 'all' && format !== 'Format') {
-            const gameFormat = (game.format || '').toLowerCase();
-            const selectedFormat = format.toLowerCase();
-            if (!gameFormat.includes(selectedFormat)) {
               return false;
             }
           }
@@ -190,9 +190,6 @@
     searchInput.addEventListener('input', applyFilters);
     if (filterPlatform) {
       filterPlatform.addEventListener('change', applyFilters);
-    }
-    if (filterFormat) {
-      filterFormat.addEventListener('change', applyFilters);
     }
 
     // Prevent drag on all images
