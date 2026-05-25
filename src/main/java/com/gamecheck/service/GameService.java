@@ -54,6 +54,7 @@ public class GameService {
                             .title(g.getGameTitle())
                             .platform(g.getPlatform())
                             .bestPricePhp(best.orElse(null))
+                            .coverImageUrl(g.getCoverImageUrl())
                             .build());
         }
         out.sort(priceSortComparator(parseSearchSort(sort)));

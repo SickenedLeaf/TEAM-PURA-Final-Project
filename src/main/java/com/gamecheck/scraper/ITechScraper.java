@@ -14,7 +14,26 @@ public class ITechScraper extends GenericScraper {
     // CONSTRUCTOR
     // ==========================================
     public ITechScraper() {
-        super("iTech", "https://www.itech.ph/sitemap.xml");
+        super("iTech", determineWorkingSitemapUrl());
+    }
+
+    private static String determineWorkingSitemapUrl() {
+        // Try product-sitemap.xml first (WooCommerce stores often expose this directly)
+        String productSitemapUrl = "https://www.itech.ph/product-sitemap.xml";
+        String mainSitemapUrl = "https://www.itech.ph/sitemap.xml";
+
+        try {
+            // Attempt to fetch the product sitemap
+            org.jsoup.Jsoup.connect(productSitemapUrl)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .timeout(10000)
+                .get();
+            System.out.println("[iTech] Using product-sitemap.xml directly");
+            return productSitemapUrl;
+        } catch (Exception e) {
+            System.out.println("[iTech] product-sitemap.xml not accessible, falling back to main sitemap.xml");
+            return mainSitemapUrl;
+        }
     }
 
     // ==========================================
@@ -44,7 +63,7 @@ public class ITechScraper extends GenericScraper {
             String productCode = this.generateUniqueCode(rawTitle);
 
             // 3. Extract Box Art URL
-            Element boxArtNode = doc.selectFirst(".xts-col-inner a[href*='/uploads/'] img, .xts-col-inner img, img[srcset], img[data-srcset], img[data-lazy-srcset]");
+            Element boxArtNode = doc.selectFirst(".woocommerce-product-gallery__image img, .xts-col-inner img[srcset], .xts-col-inner img[data-srcset], .xts-col-inner img[data-large_image]");
             String boxArtUrl = "";
 
             if (boxArtNode != null) {

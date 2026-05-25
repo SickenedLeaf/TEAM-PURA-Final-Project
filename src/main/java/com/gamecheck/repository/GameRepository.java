@@ -12,7 +12,7 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
   @Query(
       value =
           """
-          SELECT game_id, game_title, platform, metacritic_score, trailer_url, cover_image_url
+          SELECT game_id, game_title, platform, metacritic_score, trailer_url, cover_image_url, product_code
           FROM games
           WHERE search_vector @@ plainto_tsquery('english', :query)
           """,
@@ -22,7 +22,7 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
   @Query(
       value =
           """
-          SELECT game_id, game_title, platform, metacritic_score, trailer_url, cover_image_url
+          SELECT game_id, game_title, platform, metacritic_score, trailer_url, cover_image_url, product_code
           FROM games
           WHERE search_vector @@ plainto_tsquery('english', :query)
             AND platform = :platform

@@ -40,8 +40,17 @@ public abstract class GenericScraper {
             .userAgent(this.userAgent)
             .header("Accept-Language", "en-US,en;q=0.9")
             .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+            .header("sec-ch-ua", "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\"")
+            .header("sec-ch-ua-mobile", "?0")
+            .header("sec-ch-ua-platform", "\"Windows\"")
+            .header("sec-fetch-dest", "document")
+            .header("sec-fetch-mode", "navigate")
+            .header("sec-fetch-site", "none")
+            .header("sec-fetch-user", "?1")
+            .header("upgrade-insecure-requests", "1")
+            .header("cache-control", "max-age=0")
             .referrer("https://www.google.com")
-            .timeout(10000);
+            .timeout(15000);
     }
 
     // ==========================================
@@ -160,7 +169,7 @@ public abstract class GenericScraper {
             }
         }
 
-        for (String attr : new String[]{"data-src", "data-zoom-image", "data-image-src", "data-src-full", "src"}) {
+        for (String attr : new String[]{"data-zoom", "data-large_image", "data-src", "data-zoom-image", "data-image-src", "data-src-full", "src"}) {
             String candidate = element.attr(attr).trim();
             if (!candidate.isBlank()) {
                 return normalizeImageUrl(candidate);

@@ -67,7 +67,11 @@ public class AggregationService {
             }
         }
 
-        wishlistPriceAlertService.checkAndLogPriceDropAlerts();
+        try {
+            wishlistPriceAlertService.checkAndLogPriceDropAlerts();
+        } catch (Exception e) {
+            log.error("Wishlist price alert check failed: {}", e.getMessage(), e);
+        }
         log.info("Full price aggregation finished");
     }
 
@@ -127,6 +131,14 @@ public class AggregationService {
             .build();
 
         Game savedGame = gameRepository.save(game);
+        
+        // Check that the saved game has a non-null gameId before proceeding
+        if (savedGame.getGameId() == null) {
+            log.error("Failed to save game - gameId is null after save for title: {}, productCode: {}", 
+                priceRecord.getGameTitle(), priceRecord.getProductCode());
+            throw new IllegalStateException("Game save failed - gameId is null");
+        }
+        
         updateSearchVector(savedGame);
         return savedGame;
     }

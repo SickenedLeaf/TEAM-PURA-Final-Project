@@ -19,4 +19,5 @@ public class GameSummaryDto {
     private String platform;
     /** Lowest tracked price in PHP, or null if no price rows exist for this game. */
     private BigDecimal bestPricePhp;
+    private String coverImageUrl;
 }
