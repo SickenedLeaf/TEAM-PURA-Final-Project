@@ -3,6 +3,7 @@ package com.gamecheck.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamecheck.dto.NintendoGameDto;
+import com.gamecheck.dto.ScrapeSingleResponse;
 import com.gamecheck.model.Game;
 import com.gamecheck.model.Price;
 import com.gamecheck.model.Source;
@@ -54,6 +55,101 @@ public class NintendoAggregationService {
         this.sourceRepository = sourceRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
+    }
+
+    @Transactional
+    public ScrapeSingleResponse aggregateForTitle(String gameTitle) {
+        // 1. Fetch all existing games from our DB
+        List<Game> existingGames = gameRepository.findAll();
+
+        // 2. Create a fast-lookup Map using Normalized Titles as the key
+        Map<String, Game> gameMap = existingGames.stream()
+            .collect(Collectors.toMap(
+                game -> normalizeTitle(game.getGameTitle()),
+                game -> game,
+                (existing, replacement) -> existing // Ignore duplicates
+            ));
+
+        // 3. Fetch data from the Nintendo API with specific query
+        List<NintendoGameDto> nintendoData = fetchFromNintendoApi(gameTitle);
+
+        // 4. Get or create Nintendo eShop source
+        Source nintendoSource = getOrCreateNintendoEShopSource();
+
+        // 5. Track statistics
+        int matchedCount = 0;
+        int createdCount = 0;
+        List<String> matchedTitles = new ArrayList<>();
+        List<String> createdTitles = new ArrayList<>();
+
+        // 6. Match and Aggregate
+        for (NintendoGameDto nintendoGame : nintendoData) {
+            String normalizedEShopTitle = normalizeTitle(nintendoGame.getTitle());
+
+            if (gameMap.containsKey(normalizedEShopTitle)) {
+                Game matchedGame = gameMap.get(normalizedEShopTitle);
+
+                // Check if price already exists for this game and source
+                Optional<Price> existingPrice = priceRepository.findByGameAndSource(matchedGame, nintendoSource);
+                
+                if (existingPrice.isEmpty()) {
+                    Price digitalListing = new Price();
+                    digitalListing.setGame(matchedGame);
+                    digitalListing.setSource(nintendoSource);
+                    digitalListing.setPricePhp(convertUsdToPhp(nintendoGame.getPrice()));
+                    digitalListing.setPriceOriginal(nintendoGame.getPrice());
+                    digitalListing.setCurrencyCode("USD");
+                    digitalListing.setListingUrl(nintendoGame.getUrl());
+                    digitalListing.setLastUpdated(LocalDateTime.now());
+                    
+                    priceRepository.save(digitalListing);
+                } else {
+                    // Update existing price
+                    Price price = existingPrice.get();
+                    price.setPricePhp(convertUsdToPhp(nintendoGame.getPrice()));
+                    price.setPriceOriginal(nintendoGame.getPrice());
+                    price.setListingUrl(nintendoGame.getUrl());
+                    price.setLastUpdated(LocalDateTime.now());
+                    priceRepository.save(price);
+                }
+                
+                matchedCount++;
+                matchedTitles.add(nintendoGame.getTitle());
+            } else {
+                // Game doesn't exist in our database - create it as a digital-exclusive game
+                Game newGame = new Game();
+                newGame.setGameTitle(nintendoGame.getTitle());
+                newGame.setPlatform(nintendoGame.getPlatform());
+                newGame.setCoverImageUrl(nintendoGame.getCoverImageUrl());
+                
+                Game savedGame = gameRepository.save(newGame);
+                
+                // Create price listing for the new game
+                Price digitalListing = new Price();
+                digitalListing.setGame(savedGame);
+                digitalListing.setSource(nintendoSource);
+                digitalListing.setPricePhp(convertUsdToPhp(nintendoGame.getPrice()));
+                digitalListing.setPriceOriginal(nintendoGame.getPrice());
+                digitalListing.setCurrencyCode("USD");
+                digitalListing.setListingUrl(nintendoGame.getUrl());
+                digitalListing.setLastUpdated(LocalDateTime.now());
+                
+                priceRepository.save(digitalListing);
+                
+                createdCount++;
+                createdTitles.add(nintendoGame.getTitle());
+                logger.info("Created new digital-exclusive game: {}", nintendoGame.getTitle());
+            }
+        }
+
+        // 7. Return response with statistics
+        return ScrapeSingleResponse.builder()
+            .nintendoResultsCount(nintendoData.size())
+            .matchedDbGamesCount(matchedCount)
+            .newGamesCreatedCount(createdCount)
+            .matchedGameTitles(matchedTitles)
+            .createdGameTitles(createdTitles)
+            .build();
     }
 
     @Transactional
@@ -126,13 +222,37 @@ public class NintendoAggregationService {
     // Normalizes titles for fuzzy matching
     private String normalizeTitle(String rawTitle) {
         if (rawTitle == null) return "";
-        return rawTitle.toLowerCase()
-                .replaceAll("\\(us\\)", "")
-                .replaceAll("\\(eu\\)", "")
-                .replaceAll("\\(asian\\)", "")
-                .replaceAll("™", "")
-                .replaceAll("®", "")
-                .replaceAll("[^a-z0-9]", "");
+        String cleanText = rawTitle.toLowerCase();
+
+        // Strip platform prefixes
+        cleanText = cleanText.replace("nintendo switch 2", "")
+                             .replace("nintendo switch", "")
+                             .replace("nintendo", "")
+                             .replace("switch 2", "")
+                             .replace("switch", "")
+                             .replace("nsw", "")
+                             .replace("ns", "");
+
+        // Strip regional/edition suffixes
+        cleanText = cleanText.replace("eu", "")
+                             .replace("us", "")
+                             .replace("jpn", "")
+                             .replace("asian", "")
+                             .replace("asia", "")
+                             .replace("eng", "")
+                             .replace("fr", "")
+                             .replace("sp", "")
+                             .replace("standard edition", "")
+                             .replace("deluxe edition", "")
+                             .replace("complete edition", "");
+
+        // Apply existing replacements
+        return cleanText.replaceAll("\\(us\\)", "")
+                        .replaceAll("\\(eu\\)", "")
+                        .replaceAll("\\(asian\\)", "")
+                        .replaceAll("™", "")
+                        .replaceAll("®", "")
+                        .replaceAll("[^a-z0-9]", "");
     }
 
     // Get or create Nintendo eShop source
@@ -196,11 +316,17 @@ public class NintendoAggregationService {
 
     // Fetch games from Nintendo US eShop Algolia API
     private List<NintendoGameDto> fetchFromNintendoApi() {
+        return fetchFromNintendoApi("");
+    }
+
+    // Fetch games from Nintendo US eShop Algolia API with specific query
+    private List<NintendoGameDto> fetchFromNintendoApi(String query) {
         List<NintendoGameDto> games = new ArrayList<>();
         
         try {
             // Build request body with correct Algolia payload structure
-            String requestBody = "{\"requests\":[{\"indexName\":\"store_game_en_us\",\"params\":\"query=&hitsPerPage=40\"}]}";
+            String encodedQuery = query.isEmpty() ? "" : java.net.URLEncoder.encode(query, "UTF-8");
+            String requestBody = "{\"requests\":[{\"indexName\":\"store_game_en_us\",\"params\":\"query=" + encodedQuery + "&hitsPerPage=40\"}]}";
             
             // Set headers with correct Algolia header names
             HttpHeaders headers = new HttpHeaders();
