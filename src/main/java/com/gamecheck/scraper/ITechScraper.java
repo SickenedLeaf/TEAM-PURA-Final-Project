@@ -120,19 +120,19 @@ public class ITechScraper extends GenericScraper {
             // 5. Categorize Platform explicitly using the local URL input argument
             String platform;
             if (url.toLowerCase().contains("nintendo-switch-2")) {
-                platform = "Switch 2 only";
+                platform = "Nintendo Switch 2";
             } else {
-                platform = "Nintendo Switch and Switch 2";
+                platform = "Nintendo Switch";
             }
 
             // Return the finalized instance payload
             return new Product(productCode, rawTitle, platform, price, isAvailable, this.storeName, url, boxArtUrl);
 
         } catch (IOException e) {
-            System.err.println("❌ Network / Parsing Exception at iTech URL [" + url + "]: " + e.getMessage());
+            System.err.println("Network / Parsing Exception at iTech URL [" + url + "]: " + e.getMessage());
             return null;
         } catch (Exception e) {
-            System.err.println("❌ Critical runtime breakdown at iTech URL [" + url + "]: " + e.getMessage());
+            System.err.println("Critical runtime breakdown at iTech URL [" + url + "]: " + e.getMessage());
             e.printStackTrace(); // This prints out the exact line number causing the issue
             return null;
         }
