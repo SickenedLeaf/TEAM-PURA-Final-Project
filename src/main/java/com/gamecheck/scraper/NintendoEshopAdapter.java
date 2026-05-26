@@ -84,7 +84,8 @@ public class NintendoEshopAdapter implements SourceAdapter {
                     System.err.println("[Nintendo eShop] Missing title_master_s for game: " + title);
                     continue;
                 }
-                String productCode = truncateOrHash(titleMaster);
+                String productTitleClean = generateUniqueCode(titleMaster);
+                String productCode = hashString(productTitleClean);
 
                 // Build listing URL using url field if available, otherwise fallback to store games page
                 String urlField = game.path("url").asText();
@@ -134,6 +135,60 @@ public class NintendoEshopAdapter implements SourceAdapter {
             return new BigDecimal(normalized);
         } catch (NumberFormatException e) {
             return null;
+        }
+    }
+
+    protected String generateUniqueCode(String rawTitle) {
+        String cleanText = rawTitle.toLowerCase();
+
+        // 1. Strip platform and hardware branding
+        cleanText = cleanText.replace("nintendo switch 2", "")
+                             .replace("nintendo switch", "")
+                             .replace("nintendo", "")
+                             .replace("switch 2", "")
+                             .replace("switch", "")
+                             .replace("ns2", "")
+                             .replace("ns", "");
+
+        // 2. Strip storefront packaging and market regional tags
+        cleanText = cleanText.replace("mde", "")
+                             .replace("asi", "")
+                             .replace("us/eng/fr", "")
+                             .replace("us/eng", "")
+                             .replace("eng", "")
+                             .replace("standard edition", "")
+                             .replace("edition", "");
+
+        // 3. Flatten remaining characters using alpha-numeric regex matching
+        cleanText = cleanText.replaceAll("[^a-zA-Z0-9]", "").trim();
+
+        // 4. Pass down to the mathematical hashing layer
+        return hashString(cleanText);
+    }
+
+    /**
+     * Converts a baseline normalized text string into a deterministic 
+     * 8-character SHA-256 hex signature.
+     */
+    private String hashString(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            
+            // Extract the first 4 bytes to establish a short, compact 8-character ID
+            for (int i = 0; i < 4; i++) {
+                String hex = Integer.toHexString(0xff & hashBytes[i]);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString().toUpperCase();
+            
+        } catch (NoSuchAlgorithmException e) {
+            // Unconditional fallback to basic absolute hash code if system crypto fails
+            return String.valueOf(Math.abs(input.hashCode()));
         }
     }
 
