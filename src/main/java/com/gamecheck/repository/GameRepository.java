@@ -33,4 +33,6 @@ public interface GameRepository extends JpaRepository<Game, Integer> {
   List<Game> findByPlatform(String platform);
 
   Optional<Game> findByProductCode(String productCode);
+
+  List<Game> findByGameTitleContainingIgnoreCase(String title);
 }
