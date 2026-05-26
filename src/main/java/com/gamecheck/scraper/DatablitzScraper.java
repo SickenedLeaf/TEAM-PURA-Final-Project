@@ -75,9 +75,9 @@ public class DatablitzScraper extends GenericScraper {
             // 5. Dynamic Platform Categorization Gauntlet Rule
             String platform;
             if (url.contains("nintendo-switch-2")) {
-                platform = "Switch 2 only";
+                platform = "Nintendo Switch 2";
             } else {
-                platform = "Nintendo Switch and Switch 2";
+                platform = "Nintendo Switch";
             }
 
             // Return the finalized instance payload cleanly back up into the pipeline
