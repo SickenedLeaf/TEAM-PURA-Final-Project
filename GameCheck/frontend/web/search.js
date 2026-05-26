@@ -1,8 +1,10 @@
+// ── Config ─────────────────────────────────────────────────
 const GAMES_PER_PAGE = 10; 
 const API_BASE_URL = 'https://team-pura-final-project-production.up.railway.app/api';
 let currentPage = 1;
 let filteredGames = [];
 let cachedGames = []; 
+
 // ── DOM ────────────────────────────────────────────────────
 const grid         = document.getElementById('resultsGrid');
 const paginationEl = document.getElementById('pagination');
@@ -11,6 +13,14 @@ const searchInput  = document.getElementById('searchInput');
 const filterPlatform = document.getElementById('filterPlatform');
 const filterFormat = document.getElementById('filterFormat');
 const loadingText  = document.getElementById('loadingText');
+
+// Helper function to remove accents quickly
+function stripAccents(str) {
+  return (str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
 
 // ── Render Cards ───────────────────────────────────────────
 function renderGames(games) 
@@ -59,7 +69,6 @@ function renderPagination(total)
   }
   paginationEl.classList.remove('hidden');
 
-  // Logic to calculate which page numbers to show
   const delta = 1;
   const range = [];
   for(let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) 
@@ -119,29 +128,18 @@ function updateCount(total)
 // ── Unified Filter Pipeline ─────────────────────────────────── //
 function filterGames(games, query, platform, format) 
 {
-  const queryClean = query
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+  const queryClean = stripAccents(query);
   
   return games.filter(game => 
   {
-    const gameTitleClean = (game.title || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
-
-    // Text matching: if query is empty, allow all games to pass
     const matchesText = queryClean === '' 
       ? true 
-      : gameTitleClean.includes(queryClean);
+      : game.cleanTitle.includes(queryClean);
     
-    // Platform filter: bypass placeholder values
     const matchesPlatform = (platform === 'Platform' || platform === '' || platform === 'all')
       ? true
       : game.platform.toLowerCase() === platform.toLowerCase();
     
-    // Format filter: bypass placeholder values, check if game has the format
     const matchesFormat = (format === 'Format' || format === '' || format === 'all')
       ? true
       : game.availableFormats && game.availableFormats.some(f => f.toLowerCase() === format.toLowerCase());
@@ -166,15 +164,8 @@ function applyFilters()
 
 // ── Event Listeners ──────────────────────────────────────── //
 searchInput.addEventListener('input', applyFilters);
-if(filterPlatform) 
-{
-  filterPlatform.addEventListener('change', applyFilters);
-}
-
-if(filterFormat) 
-{
-  filterFormat.addEventListener('change', applyFilters);
-}
+if(filterPlatform) filterPlatform.addEventListener('change', applyFilters);
+if(filterFormat) filterFormat.addEventListener('change', applyFilters);
 
 document.querySelectorAll('img, svg, video').forEach(el => 
 {
@@ -191,12 +182,11 @@ document.querySelectorAll('img').forEach(el =>
 document.addEventListener('DOMContentLoaded', async () => 
 {
   searchInput.value = ''; 
-  
   if(loadingText) loadingText.style.display = 'none';
 
   const savedCatalog = sessionStorage.getItem('gamecheck_catalog');
   if (savedCatalog) 
-    {
+  {
     cachedGames = JSON.parse(savedCatalog);
     applyFilters(); 
     return;
@@ -214,24 +204,77 @@ document.addEventListener('DOMContentLoaded', async () =>
     `;
   }
   grid.innerHTML = skeletonHTML;
+  
+  if(countEl) 
+  {
+    countEl.textContent = 'Connecting to database: 0%';
+  }
 
   try 
   {
     const response = await fetch(`${API_BASE_URL}/games/search?query=`);
-    
     if(!response.ok) throw new Error(`API error: ${response.status}`);
-    const data = await response.json();
     
-    cachedGames = data;
-    sessionStorage.setItem('gamecheck_catalog', JSON.stringify(data));
+    // ── STREAM TRACKING LOGIC ──
+    const contentLength = response.headers.get('content-length');
+    const totalBytes = contentLength ? parseInt(contentLength, 10) : 450000; 
+    
+    const reader = response.body.getReader();
+    let receivedBytes = 0;
+    let chunks = [];
 
-    applyFilters();
+    while(true) 
+    {
+      const { done, value } = await reader.read();
+      
+      if(done) 
+      {
+        break;
+      }
+      
+      chunks.push(value);
+      receivedBytes += value.length;
+      
+      let percent = Math.min(Math.round((receivedBytes / totalBytes) * 100), 99);
+      if(countEl) 
+      {
+        countEl.textContent = `Downloading catalog database: ${percent}%`;
+      }
+    }
+
+    let allChunks = new Uint8Array(receivedBytes);
+    let position = 0;
+    for(let chunk of chunks) 
+    {
+      allChunks.set(chunk, position);
+      position += chunk.length;
+    }
+    
+    const decodedString = new TextDecoder("utf-8").decode(allChunks);
+    const data = JSON.parse(decodedString);
+    cachedGames = data.map(game => ({
+      ...game,
+      cleanTitle: stripAccents(game.title)
+    }));
+    
+    sessionStorage.setItem('gamecheck_catalog', JSON.stringify(cachedGames));
+    
+    if(countEl) 
+    {
+      countEl.textContent = 'Catalog fully synchronized! Rendering...';
+    }
+    
+    setTimeout(() => 
+    {
+      applyFilters();
+    }, 200);
 
   } 
-  
+
   catch(error) 
   {
     console.error('Failed to fetch games:', error);
-    grid.innerHTML = '<p class="no-results" style="color: white;">Failed to load games. Please try again later.</p>';
+    if (countEl) countEl.textContent = '';
+    grid.innerHTML = '<p class="no-results" style="color: white;">Failed to load catalog. Please try again later.</p>';
   }
 });

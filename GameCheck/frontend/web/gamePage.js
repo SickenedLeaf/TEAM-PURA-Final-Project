@@ -48,12 +48,10 @@ tabBtns.forEach(btn =>
       tabPanes.forEach(p => p.classList.remove('active'));
       wordsSection.classList.remove('closing');
 
-      //Activate the clicked button and matching pane
       btn.classList.add('active');
       const targetPane = document.getElementById(targetId);
       if(targetPane) targetPane.classList.add('active');
 
-      //Slide up the section if it's currently hidden
       if(!wordsSection.classList.contains('visible')) 
       {
         wordsSection.classList.add('visible');
@@ -118,18 +116,16 @@ async function loadGameData()
     const gameData = await gameResponse.json();
     populateGameDetails(gameData);
 
-    // Fetch the prices
     const pricesResponse = await fetch(`${API_BASE_URL}/games/${gameId}/prices`);
     if(!pricesResponse.ok) throw new Error(`Failed to fetch prices: ${pricesResponse.status}`);
     const pricesData = await pricesResponse.json();
     
-    //Inject the real prices!
     populatePriceTable(pricesData);
     updateAvailability(pricesData);
 
   } 
   
-  catch (error) 
+  catch(error) 
   {
     console.error('Failed to load game data:', error);
     document.querySelector('.game-title').textContent = 'Failed to load game data';
