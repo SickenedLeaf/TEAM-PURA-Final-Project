@@ -1,10 +1,13 @@
 package com.gamecheck.controller;
 
+import com.gamecheck.dto.ScrapeSingleRequest;
+import com.gamecheck.dto.ScrapeSingleResponse;
 import com.gamecheck.service.AggregationService;
 import com.gamecheck.service.NintendoAggregationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,5 +28,11 @@ public class AdminController {
         aggregationService.runFullUpdate();
         nintendoAggregationService.aggregateEShopPrices();
         return ResponseEntity.ok("Aggregation triggered");
+    }
+
+    @PostMapping("/scrape-single")
+    public ResponseEntity<ScrapeSingleResponse> scrapeSingle(@RequestBody ScrapeSingleRequest request) {
+        ScrapeSingleResponse response = nintendoAggregationService.aggregateForTitle(request.getGameTitle());
+        return ResponseEntity.ok(response);
     }
 }
