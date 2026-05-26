@@ -1,2 +1,2 @@
 ALTER TABLE games
-ADD COLUMN product_code VARCHAR(8) UNIQUE;
+ADD COLUMN product_code VARCHAR(100);
