@@ -1,2 +1,2 @@
 ALTER TABLE games
-ALTER COLUMN product_code TYPE VARCHAR(20);
+ALTER COLUMN product_code TYPE VARCHAR(100);
