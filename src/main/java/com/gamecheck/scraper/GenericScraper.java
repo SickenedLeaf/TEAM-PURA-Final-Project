@@ -307,7 +307,7 @@ public abstract class GenericScraper {
                     boolean isSwitchPlatform = lowUrl.contains("nintendo-switch") || 
                                                lowUrl.contains("nsw") || 
                                                lowUrl.contains("switch-2") || 
-                                               lowUrl.contains("switch-");
+                                               lowUrl.contains("switch");
 
                     // 2. Must NOT match accessory/hardware signatures (Fixed with && operators)
                     boolean isNotHardwareOrAccessory = !lowUrl.contains("oled") && 
@@ -318,7 +318,10 @@ public abstract class GenericScraper {
                                                        !lowUrl.contains("model") && 
                                                        !lowUrl.contains("hori-") &&
                                                        !lowUrl.contains("dobe-") &&
-                                                       !lowUrl.contains("pouch");
+                                                       !lowUrl.contains("pouch") &&
+                                                        !lowUrl.contains("grip") &&
+                                                        !lowUrl.contains("keyboard") &&
+                                                        !lowUrl.contains("lite");
 
                     // Combine both states cleanly
                     if (isSwitchPlatform && isNotHardwareOrAccessory) {
