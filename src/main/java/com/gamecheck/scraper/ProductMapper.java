@@ -56,9 +56,18 @@ public class ProductMapper {
     }
 
     private String normalizePlatform(String platform) {
-        if (platform == null || platform.isBlank()) {
-            return "Nintendo Switch";
-        }
-        return "Nintendo Switch";
+    if (platform == null || platform.isBlank()) {
+        return "Nintendo Switch"; // Default fallback
+    }
+    
+    String normalized = platform.toLowerCase().trim();
+    
+    // Check for Switch 2 indicators first
+    if (normalized.contains("switch 2") || normalized.contains("switch2")) {
+        return "Nintendo Switch 2";
+    }
+    
+    // Fallback to standard Switch
+    return "Nintendo Switch";
     }
 }
