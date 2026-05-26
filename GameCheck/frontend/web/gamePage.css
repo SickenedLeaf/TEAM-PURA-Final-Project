@@ -22,12 +22,14 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Prevents highlighting and dragging */
+/* Prevents highlighting, dragging, and layout breaking */
 img, svg 
 {
   -webkit-user-drag: none;
   user-select: none;
   pointer-events: auto;
+  max-width: 100%; /* Forces them to stay inside their box */
+  height: auto;    /* Maintains aspect ratio */
 }
 
 /* ===== Body & Blurred Background Layer ===== */
@@ -121,10 +123,20 @@ body::before
 }
 
 /* ===== BUTTONS ===== */
-.tabs-container { display: flex; gap: 20px; padding: 20px; }
+.tabs-container { 
+  display: flex; 
+  flex-wrap: wrap; /* Allows buttons to drop to the next line on mobile */
+  justify-content: center; /* Centers them nicely */
+  gap: clamp(10px, 3vw, 20px); 
+  padding: 20px 10px; 
+  width: 100%;
+}
 .tab-btn 
 { 
-  height: 50px; cursor: pointer; 
+  height: clamp(35px, 10vw, 50px); /* Dynamically scales down */
+  max-width: 100%; 
+  width: auto;
+  cursor: pointer; 
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s; 
 }
 
@@ -257,4 +269,43 @@ body::before
 {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) 
+{
+  .header {
+    padding: 0 1rem;
+    justify-content: space-between;
+  }
+  
+  .header-logo-wrap 
+  {
+    position: static; 
+    transform: none;
+    display: flex;
+    justify-content: center;
+    flex-grow: 1; 
+  }
+
+  .header-logo 
+  {
+    height: clamp(30px, 8vw, 45px); 
+  }
+
+  .svg-btn 
+  {
+    height: clamp(24px, 6vw, 32px);
+  }
+
+  .game-details-wrapper 
+  {
+    padding-top: 110px; 
+  }
+
+  .words-section 
+  {
+    padding: 40px 20px; 
+    border-radius: 30px 30px 0 0; 
+  }
 }
