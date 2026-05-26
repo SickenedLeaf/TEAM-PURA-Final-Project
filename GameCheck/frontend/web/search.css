@@ -1,22 +1,28 @@
 /* ===== FONTS ===== */
-@font-face {
+@font-face 
+{
   font-family: 'CyberformDemo-Regular';
   src: url('/fonts/CyberformDemo.otf') format('truetype');
   font-display: swap;
 }
-@font-face {
+
+@font-face 
+{
   font-family: 'FuturaPt-Demi';
   src: url('/fonts/FuturaPTDemi.ttf') format('truetype');
   font-display: swap;
 }
-@font-face {
+
+@font-face 
+{
   font-family: 'FuturaPt-Bold';
   src: url('/fonts/FuturaPTBold.ttf') format('truetype');
   font-display: swap;
 }
 
 /* ===== RESET ===== */
-*, *::before, *::after {
+*, *::before, *::after 
+{
   box-sizing: border-box;
   margin: 0; padding: 0; border: none;
   background: none;
@@ -34,7 +40,8 @@ img, svg, video { -webkit-user-drag: none; user-select: none; }
 }
 
 /* ===== PAGE FADE-IN ===== */
-body {
+body 
+{
   background: var(--light);
   color: var(--dark);
   font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
@@ -46,7 +53,8 @@ body {
 }
 
 /* ===== HEADER ===== */
-.header {
+.header 
+{
   background: var(--dark);
   height: 90px;
   display: flex;
@@ -59,8 +67,9 @@ body {
   box-shadow: 0 2px 16px rgba(0,0,0,0.4);
 }
 
-/* Back Button — uses searchBackButton.svg */
-.back-btn {
+/* Back Button */
+.back-btn 
+{
   width: clamp(48px, 5vw, 72px);
   height: auto;
   cursor: pointer;
@@ -69,37 +78,43 @@ body {
               filter 0.2s ease;
   flex-shrink: 0;
 }
-.back-btn:hover {
+.back-btn:hover 
+{
   transform: scale(1.08) translateX(-3px);
   filter: brightness(1.2);
 }
 .back-btn:active { transform: scale(0.95); }
 
 /* Centered logo */
-.header-logo-wrap {
+.header-logo-wrap 
+{
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
 }
-.header-logo {
+.header-logo 
+{
   height: clamp(36px, 5vw, 55px);
   width: auto;
 }
 
 /* Right spacer to balance layout */
-.header-spacer {
+.header-spacer 
+{
   width: clamp(70px, 9vw, 116px);
   flex-shrink: 0;
 }
 
 /* ===== MAIN WRAPPER ===== */
-.search-page-wrapper {
+.search-page-wrapper 
+{
   width: 100%;             /* ← always full browser width */
   padding-top: clamp(1.5rem, 3vw, 3rem);  /* ← only top padding */
 }
 
 /* ===== SEARCH SHELF (Dark Panel) ===== */
-.search-shelf {
+.search-shelf 
+{
   background: var(--dark);
   border-radius: 50px 50px 0 0;
   padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 4rem) clamp(1rem, 2vw, 2rem);
@@ -109,7 +124,8 @@ body {
 }
 
 /* ===== SEARCH BAR ===== */
-.search-bar-container {
+.search-bar-container 
+{
   background: var(--light);
   border-radius: 999px;
   display: flex;
@@ -118,7 +134,8 @@ body {
   height: clamp(52px, 6vw, 75px);
   gap: 12px;
 }
-.search-bar-container input {
+.search-bar-container input 
+{
   flex: 1;
   font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
   font-size: clamp(15px, 1.8vw, 22px);
@@ -129,8 +146,9 @@ body {
 }
 .search-bar-container input::placeholder { color: #888; }
 
-/* Search icon (matches searchBar.svg icon path) */
-.search-icon-btn {
+/* Search icon */
+.search-icon-btn 
+{
   background: none;
   border: none;
   cursor: pointer;
@@ -142,7 +160,8 @@ body {
   transition: transform 0.2s ease;
 }
 .search-icon-btn:hover { transform: scale(1.15); }
-.search-icon-btn svg {
+.search-icon-btn svg 
+{
   width: clamp(22px, 2.5vw, 34px);
   height: auto;
   fill: var(--dark);
@@ -150,7 +169,8 @@ body {
 }
 
 /* ===== FILTERS ===== */
-.filters-container {
+.filters-container 
+{
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -158,14 +178,16 @@ body {
   border-bottom: 2px solid rgba(255,255,255,0.1);
   padding-bottom: clamp(1rem, 2vw, 1.5rem);
 }
-.filters-label {
+.filters-label 
+{
   color: var(--white);
   font-family: 'FuturaPt-Demi', sans-serif;
   font-size: clamp(14px, 1.5vw, 20px);
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
-.dropdown-pill {
+.dropdown-pill 
+{
   background: var(--light);
   color: var(--dark);
   font-family: 'FuturaPt-Demi', sans-serif;
@@ -181,39 +203,44 @@ body {
   outline: none;
   transition: filter 0.2s ease, transform 0.2s ease;
 }
-.dropdown-pill:hover {
+.dropdown-pill:hover 
+{
   filter: brightness(0.92);
   transform: scale(1.03);
 }
 
 /* ===== RESULTS SECTION ===== */
-.results-section {
+.results-section 
+{
   background: var(--dark);
   padding: clamp(1.2rem, 2.5vw, 2.5rem) clamp(1.5rem, 4vw, 4rem) clamp(2rem, 4vw, 4rem);
   min-height: 400px;
 }
 
-.results-header {
+.results-header 
+{
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: clamp(1rem, 2vw, 2rem);
 }
-.results-title {
+.results-title 
+{
   color: var(--white);
   font-family: 'FuturaPt-Demi', sans-serif;
   font-size: clamp(14px, 1.5vw, 20px);
   letter-spacing: 0.1em;
 }
-.results-count {
+.results-count 
+{
   color: rgba(255,255,255,0.45);
   font-size: clamp(12px, 1.2vw, 16px);
   letter-spacing: 0.05em;
 }
 
 /* ===== GAME CARDS GRID ===== */
-/* 5 columns × 2 rows = 10 per page */
-.results-grid {
+.results-grid 
+{
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: clamp(16px, 2.5vw, 30px);
@@ -224,7 +251,8 @@ body {
 @media (max-width: 560px)  { .results-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* Empty state */
-.no-results {
+.no-results 
+{
   grid-column: 1 / -1;
   color: rgba(255,255,255,0.45);
   text-align: center;
@@ -233,22 +261,25 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* Game Card — matches gameCard.svg style */
-.game-card {
+/* Game Card */
+.game-card 
+{
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
   animation: cardFadeIn 0.4s ease both;
 }
-@keyframes cardFadeIn {
+@keyframes cardFadeIn 
+{
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.game-card-img {
+.game-card-img 
+{
   width: 100%;
-  aspect-ratio: 203 / 253; /* matches gameCard.svg rect proportions */
+  aspect-ratio: 203 / 253;
   background: var(--light);
   border-radius: clamp(16px, 2.5vw, 37px);
   margin-bottom: clamp(8px, 1vw, 14px);
@@ -259,18 +290,21 @@ body {
   align-items: center;
   justify-content: center;
 }
-.game-card-img img {
+.game-card-img img 
+{
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
 }
-.game-card:hover .game-card-img {
+.game-card:hover .game-card-img 
+{
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 16px 36px rgba(0,0,0,0.5);
 }
 
-.game-card-title {
+.game-card-title 
+{
   color: var(--light);
   font-family: 'FuturaPt-Demi', sans-serif;
   font-size: clamp(12px, 1.2vw, 17px);
@@ -278,21 +312,24 @@ body {
   margin-bottom: 3px;
   line-height: 1.3;
 }
-.game-card-price {
+.game-card-price 
+{
   color: var(--green);
   font-family: 'FuturaPt-Bold', sans-serif;
   font-weight: 700;
   font-size: clamp(12px, 1.1vw, 16px);
   margin-bottom: 2px;
 }
-.game-card-meta {
+.game-card-meta 
+{
   color: rgba(217,217,217,0.5);
   font-size: clamp(10px, 0.9vw, 13px);
   text-align: center;
 }
 
 /* ===== PAGINATION ===== */
-.pagination {
+.pagination 
+{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -301,7 +338,8 @@ body {
 }
 .pagination.hidden { display: none; }
 
-.page-num {
+.page-num 
+{
   background: none;
   color: var(--white);
   border: 2px solid rgba(217,217,217,0.4);
@@ -317,25 +355,27 @@ body {
   transition: background 0.2s ease, color 0.2s ease,
               border-color 0.2s ease, transform 0.15s ease;
 }
-.page-num:hover {
+.page-num:hover 
+{
   background: rgba(217,217,217,0.15);
   border-color: var(--light);
   transform: scale(1.08);
 }
-.page-num.active {
+.page-num.active 
+{
   background: var(--light);
   color: var(--dark);
   border-color: var(--light);
   font-family: 'FuturaPt-Bold', sans-serif;
 }
 
-.page-dots {
+.page-dots 
+{
   color: rgba(217, 217, 217, 0.6);
   font-family: 'FuturaPt-Bold', sans-serif;
   font-size: clamp(14px, 1.5vw, 20px);
   padding: 0 clamp(4px, 1vw, 8px);
   display: flex;
   align-items: flex-end;
-  padding-bottom: 5px; /* Aligns dots with the text baseline of the buttons */
-  user-select: none;
+  padding-bottom: 5px; 
 }

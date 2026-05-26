@@ -4,19 +4,24 @@
   src: url('/fonts/CyberformDemo.otf') format('truetype');
   font-display: swap;
 }
-@font-face {
+
+@font-face 
+{
   font-family: 'FuturaPt-Demi';
   src: url('/fonts/FuturaPTDemi.ttf') format('truetype');
   font-display: swap;
 }
-@font-face {
+
+@font-face 
+{
   font-family: 'FuturaPt-Bold';
   src: url('/fonts/FuturaPTBold.ttf') format('truetype');
   font-display: swap;
 }
 
 /* ===== RESET ===== */
-*, *::before, *::after {
+*, *::before, *::after 
+{
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -26,13 +31,15 @@
   -webkit-font-smoothing: antialiased;
 }
 menu, ol, ul { list-style-type: none; }
-img, svg, video {
+img, svg, video 
+{
   -webkit-user-drag: none;
   user-select: none;
 }
 
 /* ===== VARIABLES ===== */
-:root {
+:root 
+{
   --dark:  #262525;
   --light: #d9d9d9;
   --white: #ffffff;
@@ -40,15 +47,16 @@ img, svg, video {
 
 /* ===== BASE ===== */
 html { scroll-behavior: smooth; }
-body {
-  /* This is the white background that will peek through the gaps */
+body 
+{
   background: var(--white); 
   overflow-x: hidden;
   color: var(--dark);
 }
 
 /* ===== NAVBAR ===== */
-.header {
+.header 
+{
   position: absolute; 
   top: 24px; 
   left: 0;
@@ -60,33 +68,32 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(1.2rem, 5vw, 4rem);
-  /* Added a smooth transition for the drop-shadow */
   transition: box-shadow 0.3s ease; 
 }
-
-/* This class gets triggered by JavaScript when you scroll down */
-.header.is-sticky {
+.header.is-sticky 
+{
   position: fixed;
   top: 0;
-  /* Adds a premium dark shadow when it detaches from the background */
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5); 
 }
 
-.title-svg {
-  /* Massively increased the size to match your design */
+.title-svg 
+{
   height: clamp(45px, 8vw, 75px);
   width: auto;
   pointer-events: auto;
   transition: filter 0.25s ease, transform 0.25s ease;
 }
 
-.nav-buttons {
+.nav-buttons 
+{
   display: flex;
   align-items: center;
   gap: clamp(0.5rem, 1.5vw, 1.2rem);
 }
 
-.nav-btn {
+.nav-btn 
+{
   height: clamp(28px, 3.5vw, 36px);
   width: auto;
   cursor: pointer;
@@ -95,21 +102,22 @@ body {
               filter 0.2s ease;
 }
 
-.nav-btn:hover {
+.nav-btn:hover 
+{
   transform: scale(1.1) translateY(-2px);
   filter: brightness(1.3) drop-shadow(0 4px 12px rgba(217, 217, 217, 0.3));
 }
 
-.nav-btn:active {
+.nav-btn:active 
+{
   transform: scale(0.96) translateY(0);
 }
 
 /* ===== HERO ===== */
-.hero-page {
+.hero-page 
+{
   position: relative;
   width: 100%;
-  /* 24px (top gap) + 90px (header) + 24px (bottom gap) = 138px */
-  /* This pushes the hero down far enough to expose the white gap BELOW the header */
   margin-top: 138px; 
   height: calc(100vh - 138px);
   min-height: 500px;
@@ -119,7 +127,8 @@ body {
   overflow: hidden;
 }
 
-.carousel-picture-bar {
+.carousel-picture-bar 
+{
   position: absolute;
   inset: 0;
   width: 100%;
@@ -129,13 +138,15 @@ body {
   transition: opacity 0.8s ease;
 }
 
-.gradient-overlay {
+.gradient-overlay 
+{
   position: absolute;
   inset: 0;
   background: rgba(38, 37, 37, 0.71);
 }
 
-.hero-content {
+.hero-content 
+{
   position: relative;
   z-index: 2;
   display: flex;
@@ -150,7 +161,6 @@ body {
   color: var(--white);
   font-family: 'CyberformDemo-Regular', 'Courier New', monospace;
   font-size: clamp(10px, 1.5vw, 20px);
-  /* Widened tracking to match mockup */
   letter-spacing: 0.6em;
   -webkit-text-stroke: 1px #000;
   opacity: 0;
@@ -158,24 +168,27 @@ body {
   animation: heroReveal 1s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.hero-title {
+.hero-title 
+{
   opacity: 0;
   transform: translateY(20px);
   animation: heroReveal 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-.hero-title-svg {
-  /* Scaled up to dominate the space */
+.hero-title-svg 
+{
   width: clamp(300px, 78vw, 1100px);
   height: auto;
   filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.5));
 }
 
-.cta-wrapper {
+.cta-wrapper 
+{
   opacity: 0;
   transform: translateY(20px);
   animation: heroReveal 1s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-.cta-btn-svg {
+.cta-btn-svg 
+{
   width: clamp(200px, 28vw, 351px);
   height: auto;
   cursor: pointer;
@@ -183,22 +196,26 @@ body {
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 0.25s ease;
 }
-.cta-btn-svg:hover {
+.cta-btn-svg:hover 
+{
   transform: scale(1.07) translateY(-3px);
   filter: brightness(1.15) drop-shadow(0 8px 28px rgba(217, 217, 217, 0.35));
 }
-.cta-btn-svg:active {
+.cta-btn-svg:active 
+{
   transform: scale(0.98) translateY(0);
   filter: brightness(0.95);
 }
 
-@keyframes heroReveal {
+@keyframes heroReveal 
+{
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== SECTION DIVIDER ===== */
-.divider-section {
+.divider-section 
+{
   background: var(--light);
   padding: clamp(1.5rem, 3vw, 2.5rem) 0;
   display: flex;
@@ -206,19 +223,22 @@ body {
   align-items: center;
 }
 
-.line-svg {
+.line-svg 
+{
   width: 90%;
   max-width: 1100px;
   height: auto;
 }
 
 /* ===== ABOUT US ===== */
-.about-us-section {
+.about-us-section 
+{
   background: var(--dark);
   padding: clamp(3rem, 6vw, 7rem) clamp(1.5rem, 8vw, 8rem);
 }
 
-.about-us-heading {
+.about-us-heading 
+{
   color: var(--light);
   font-family: 'CyberformDemo-Regular', 'Courier New', monospace;
   font-size: clamp(36px, 5vw, 70px);
@@ -227,20 +247,23 @@ body {
   margin-bottom: clamp(2rem, 4vw, 4rem);
 }
 
-.about-us-content {
+.about-us-content 
+{
   display: flex;
   gap: clamp(2rem, 4vw, 5rem);
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
-.about-us-text {
+.about-us-text 
+{
   flex: 1 1 280px;
   display: flex;
   flex-direction: column;
   gap: clamp(1.2rem, 2.5vw, 2rem);
 }
-.about-us-text p {
+.about-us-text p 
+{
   color: var(--white);
   font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
   font-size: clamp(13px, 1.3vw, 18px);
@@ -249,56 +272,59 @@ body {
   text-align: right;
 }
 
-/* ===== VIDEO WRAPPER (Replaces .video-placeholder) ===== */
-.video-wrapper {
+/* ===== VIDEO WRAPPER ===== */
+.video-wrapper 
+{
   flex: 1 1 280px;
   min-height: clamp(220px, 30vw, 496px);
   max-width: 493px;
   background: var(--dark);
   border-radius: 8px;
-  /* overflow: hidden ensures the iframe doesn't poke outside your rounded corners */
   overflow: hidden; 
   position: relative;
 }
 
-.yt-uninteractable {
+.yt-uninteractable 
+{
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  /* THIS IS THE MAGIC BULLET: It makes the iframe completely "invisible" to mouse clicks. 
-     The user cannot click it, pause it, or open YouTube. */
   pointer-events: none; 
 }
 
 /* ===== FOOTER ===== */
-.footer-section {
-  /* Added a dark background explicitly here just in case, since body is now white */
+.footer-section 
+{
   background: var(--dark); 
   padding: 0 clamp(1rem, 3vw, 2.5rem) 0;
 }
 
-.footer-bg-card {
+.footer-bg-card 
+{
   background: var(--light);
   border-radius: clamp(30px, 5vw, 60px) clamp(30px, 5vw, 60px) 0 0;
   padding: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 6vw, 6rem) clamp(1.5rem, 3vw, 2.5rem);
 }
 
-.project-title-row {
+.project-title-row 
+{
   display: flex;
   align-items: baseline;
   gap: clamp(0.5rem, 1.5vw, 1.2rem);
   flex-wrap: wrap;
   margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
 }
-.cyberform {
+.cyberform 
+{
   font-family: 'CyberformDemo-Regular', 'Courier New', monospace;
   font-size: clamp(22px, 4.5vw, 63px);
   letter-spacing: -0.02em;
   color: var(--dark);
 }
-.futura-bold {
+.futura-bold 
+{
   font-family: 'FuturaPt-Bold', 'Futura', 'Trebuchet MS', sans-serif;
   font-size: clamp(12px, 2vw, 30px);
   font-weight: 700;
@@ -306,26 +332,30 @@ body {
   color: var(--dark);
 }
 
-.footer-team-grid {
+.footer-team-grid 
+{
   display: grid;
   grid-template-columns: 1fr 1px 1fr 1px 1fr;
   gap: 0 clamp(1.5rem, 3vw, 3rem);
   align-items: start;
 }
-@media (max-width: 640px) {
+@media(max-width: 640px) 
+{
   .footer-team-grid    { grid-template-columns: 1fr; gap: 1.5rem 0; }
   .footer-divider      { display: none; }
   .footer-col.right    { text-align: left; }
 }
 
-.footer-col {
+.footer-col 
+{
   color: var(--dark);
   font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
   font-size: clamp(12px, 1.3vw, 20px);
   letter-spacing: -0.02em;
   line-height: 1.9;
 }
-.footer-col strong {
+.footer-col strong 
+{
   font-family: 'FuturaPt-Bold', 'Futura', 'Trebuchet MS', sans-serif;
   font-weight: 700;
   display: block;
@@ -333,13 +363,15 @@ body {
 }
 .footer-col.right { text-align: right; }
 
-.footer-divider {
+.footer-divider 
+{
   background: rgba(38, 37, 37, 0.25);
   align-self: stretch;
   min-height: 80px;
 }
 
-.copyright {
+.copyright 
+{
   color: var(--dark);
   font-family: 'FuturaPt-Demi', 'Futura', 'Trebuchet MS', sans-serif;
   font-size: clamp(11px, 1vw, 18px);
@@ -349,7 +381,8 @@ body {
 }
 
 /* ===== SCROLL FADE-IN ===== */
-.fade-in {
+.fade-in 
+{
   opacity: 0;
   transform: translateY(28px);
   transition: opacity 0.75s ease, transform 0.75s ease;
@@ -357,7 +390,8 @@ body {
 .fade-in.delay-1 { transition-delay: 0.10s; }
 .fade-in.delay-2 { transition-delay: 0.22s; }
 .fade-in.delay-3 { transition-delay: 0.36s; }
-.fade-in.visible {
+.fade-in.visible 
+{
   opacity: 1;
   transform: translateY(0);
 }
