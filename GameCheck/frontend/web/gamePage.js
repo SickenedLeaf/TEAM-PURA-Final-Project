@@ -209,17 +209,17 @@ function updateAvailability(prices)
   let messageParts = [];
   if(physicalArr.length > 0) 
   {
-    messageParts.push(`Physical copies available at ${formatList(physicalArr)}`);
+    messageParts.push(`Physical copies available at ${formatList(physicalArr)}.`);
   }
 
   if(digitalArr.length > 0) 
   {
-    messageParts.push(`Digital copies available at ${formatList(digitalArr)}`);
+    messageParts.push(`Digital copies available at ${formatList(digitalArr)}.`);
   }
 
   if(messageParts.length > 0) 
   {
-    availabilityText.textContent = messageParts.join('. ') + '.';
+    availabilityText.textContent = messageParts.join('<br>');
   } 
   
   else 
