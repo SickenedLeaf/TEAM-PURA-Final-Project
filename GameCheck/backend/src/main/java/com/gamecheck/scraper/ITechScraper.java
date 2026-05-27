@@ -18,9 +18,8 @@ public class ITechScraper extends GenericScraper {
     }
 
     private static String determineWorkingSitemapUrl() {
-        // Try product-sitemap.xml first (WooCommerce stores often expose this directly)
         String productSitemapUrl = "https://www.itech.ph/product-sitemap.xml";
-        String mainSitemapUrl = "https://www.itech.ph/sitemap.xml";
+        String mainSitemapUrl = "https://www.itech.ph/sitemap_index.xml";
 
         try {
             // Attempt to fetch the product sitemap with browser spoofing headers
@@ -129,10 +128,10 @@ public class ITechScraper extends GenericScraper {
             return new Product(productCode, rawTitle, platform, price, isAvailable, this.storeName, url, boxArtUrl);
 
         } catch (IOException e) {
-            System.err.println("❌ Network / Parsing Exception at iTech URL [" + url + "]: " + e.getMessage());
+            System.err.println("Network / Parsing Exception at iTech URL [" + url + "]: " + e.getMessage());
             return null;
         } catch (Exception e) {
-            System.err.println("❌ Critical runtime breakdown at iTech URL [" + url + "]: " + e.getMessage());
+            System.err.println("Critical runtime breakdown at iTech URL [" + url + "]: " + e.getMessage());
             e.printStackTrace(); // This prints out the exact line number causing the issue
             return null;
         }

@@ -14,7 +14,6 @@ public class DatablitzScraper extends GenericScraper {
     // CONSTRUCTOR
     // ==========================================
     public DatablitzScraper() {
-        // Pointing natively to their shopify master index endpoint from your basis code
         super("DataBlitz", "https://ecommerce.datablitz.com.ph/sitemap.xml");
     }
 
