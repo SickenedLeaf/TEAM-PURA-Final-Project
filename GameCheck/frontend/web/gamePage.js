@@ -215,7 +215,7 @@ function updateAvailability(prices)
 
   if(messageParts.length > 0) 
   {
-    availabilityText.textContent = messageParts.join('<br>');
+    availabilityText.textContent = messageParts.join('\n');
   } 
   
   else 
